@@ -7,13 +7,28 @@
 #include "ns3/applications-module.h"
 #include "ns3/point-to-point-layout-module.h"
 
-int blockIntervalMinutes;
-int blockNumber;
-int iterations;
+uint blockIntervalMinutes;
+uint blockNumber = 100;
+uint iterations;
 
+NS_LOG_COMPONENT_DEFINE("selfish-miner-main");
 
-int main()
+void getParametersFromCMD(int argc, char *argv[]);
+
+int main(int argc, char* argv[])
 {
-    std::cout << "initial commit" << std::endl;
+    getParametersFromCMD(argc, argv);
+
     return 0;
+}
+
+void getParametersFromCMD(int argc, char* argv[])
+{
+    ns3::CommandLine cmd;
+
+    cmd.AddValue("blockNumber", "number of blocks", blockNumber);
+    cmd.AddValue("blockInterValMinutes", "interval time of mining block", blockIntervalMinutes);
+    cmd.AddValue("iterations", "number of iterations for running algorithm", iterations);
+
+    cmd.Parse(argc, argv);
 }
