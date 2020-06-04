@@ -50,4 +50,9 @@ namespace blockchain_attacks{
 
         return tid;
     }
+
+    SelfishMiner::SelfishMiner()
+    {
+
+    }
 }

@@ -14,6 +14,7 @@ namespace blockchain_attacks
     public:
         static ns3::TypeId GetTypeId(void);
 
+        SelfishMiner();
     private:
     };
 };
