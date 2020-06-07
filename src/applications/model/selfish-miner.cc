@@ -26,6 +26,7 @@ namespace blockchain_attacks{
 
     NS_LOG_COMPONENT_DEFINE("selfish-miner");
 
+    NS_OBJECT_ENSURE_REGISTERED(SelfishMiner);
 
     ns3::TypeId SelfishMiner::GetTypeId()
     {
@@ -53,6 +54,6 @@ namespace blockchain_attacks{
 
     SelfishMiner::SelfishMiner()
     {
-
+        NS_LOG_FUNCTION(this);
     }
 }
