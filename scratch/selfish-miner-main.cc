@@ -10,7 +10,7 @@
 #include "ns3/bitcoin.h"
 
 uint blockIntervalMinutes;
-uint blockNumber = 100;
+uint blockNumber = 1;
 uint iterations = 1;
 
 NS_LOG_COMPONENT_DEFINE("selfish-miner-main");
@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
 
     const int secsPerMin = 60;
     const double realAverageBlockGenIntervalMinutes = 10; //minutes
+    const uint16_t bitcoinPort = 8333;
 
     double minersHash[] = {0.185, 0.159, 0.133, 0.066, 0.054,
                            0.029, 0.016, 0.012, 0.012, 0.012, 0.009,
@@ -54,6 +55,44 @@ int main(int argc, char *argv[])
 
     for(int i{0}; i < iterations; i++){
         std::cout << "iteration number : " << i << std::endl;
+
+        Ipv4InterfaceContainer ipv4InterfaceContainer;
+        std::map<uint32_t, std::vector<Ipv4Address>> nodesConnections;
+        std::map<uint32_t, std::map<Ipv4Address, double>> peersDownloadSpeeds;
+        std::map<uint32_t, std::map<Ipv4Address, double>> peersUploadSpeeds;
+        std::map<uint32_t, nodeInternetSpeeds> nodesInternetSpeeds;
+        std::vector<uint32_t> miners;
+
+        BitcoinTopologyHelper bitcoinTopologyHelper(1, totalNoNodes, noMiners, minersRegions,
+                                                    Cryptocurrency::BITCOIN, minConnectionsPerNode,
+                                                    maxConnectionsPerNode, 2, 0);
+
+        InternetStackHelper stack;
+        bitcoinTopologyHelper.InstallStack(stack);
+
+        bitcoinTopologyHelper.AssignIpv4Addresses(Ipv4AddressHelperCustom("1.0.0.0", "255.255.255.0", false));
+        ipv4InterfaceContainer = bitcoinTopologyHelper.GetIpv4InterfaceContainer();
+        nodesConnections = bitcoinTopologyHelper.GetNodesConnectionsIps();
+        miners = bitcoinTopologyHelper.GetMiners();
+        peersDownloadSpeeds = bitcoinTopologyHelper.GetPeersDownloadSpeeds();
+        peersUploadSpeeds = bitcoinTopologyHelper.GetPeersUploadSpeeds();
+        nodesInternetSpeeds = bitcoinTopologyHelper.GetNodesInternetSpeeds();
+
+        BitcoinMinerHelper bitcoinMinerHelper("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), bitcoinPort),
+                                              nodesConnections[miners[0]], noMiners, peersDownloadSpeeds[0], peersUploadSpeeds[0], nodesInternetSpeeds[0],
+                                              nodeStatic, minersHash[0], averageBlockGenIntervalSeconds);
+        ApplicationContainer bitcoinMiners;
+
+        for(size_t i{0}; i < noMiners; i++){
+            auto miner = miners[i];
+            Ptr<Node> targetNode = bitcoinTopologyHelper.GetNode(miner);
+            
+            if(attackerId == miner){
+                std::cout << "attacker id is : " << attackerId << std::endl;
+                bitcoinMinerHelper.SetMinerType(MY_SELFISH_MINER);
+                std::cout << "set miner type to selfish miner" << std::endl;
+            }
+        }
     }
 
     return 0;

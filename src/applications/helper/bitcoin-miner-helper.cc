@@ -140,6 +140,12 @@ BitcoinMinerHelper::SetMinerType (enum MinerType m)  //FIX ME
 
         break;
       }
+      case MY_SELFISH_MINER:
+      {
+        std::cout << "set my selfish miner type" << std::endl;
+
+        break;
+      }
    }
 }
 
