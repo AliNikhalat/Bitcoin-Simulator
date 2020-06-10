@@ -9,6 +9,7 @@
 #include "ns3/bitcoin-simple-attacker.h"
 #include "ns3/bitcoin-selfish-miner.h"
 #include "ns3/bitcoin-selfish-miner-trials.h"
+#include "selfish-miner.h"
 
 
 namespace ns3 {

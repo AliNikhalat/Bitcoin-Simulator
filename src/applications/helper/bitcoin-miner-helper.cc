@@ -94,6 +94,24 @@ BitcoinMinerHelper::InstallPriv (Ptr<Node> node) //FIX ME
         node->AddApplication (app);
         return app;
       }
+      case MY_SELFISH_MINER:
+      {
+        std::cout << "Installing My Selfish Miner" << std::endl;
+
+        Ptr<blockchain_attacks::SelfishMiner> app = m_factory.Create<blockchain_attacks::SelfishMiner>();
+
+        app->SetPeersAddresses(m_peersAddresses);
+        app->SetPeersDownloadSpeeds(m_peersDownloadSpeeds);
+        app->SetPeersUploadSpeeds(m_peersUploadSpeeds);
+        app->SetNodeInternetSpeeds(m_internetSpeeds);
+        app->SetNodeStats(m_nodeStats);
+        app->SetBlockBroadcastType(m_blockBroadcastType);
+        app->SetProtocolType(m_protocolType);
+
+        node->AddApplication(app);
+        
+        return app;
+      }
    }
    
 }
@@ -142,7 +160,9 @@ BitcoinMinerHelper::SetMinerType (enum MinerType m)  //FIX ME
       }
       case MY_SELFISH_MINER:
       {
-        std::cout << "set my selfish miner type" << std::endl;
+        std::cout << "Setting TypeId for Selfish Miner" << std::endl;
+        m_factory.SetTypeId("blockchain_attacks::SelfishMiner");
+        SetFactoryAttributes();
 
         break;
       }

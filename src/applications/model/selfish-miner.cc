@@ -47,9 +47,24 @@ namespace blockchain_attacks{
             .AddTraceSource ("Rx",
                                 "A packet has been received",
                                 ns3::MakeTraceSourceAccessor (&SelfishMiner::m_rxTrace),
-                                "ns3::Packet::AddressTracedCallback");
+                                "ns3::Packet::AddressTracedCallback")
+            .AddAttribute("NumberOfMiners",
+                                "The number of miners",
+                                ns3::UintegerValue(16),
+                                MakeUintegerAccessor(&SelfishMiner::m_noMiners),
+                                ns3::MakeUintegerChecker<uint32_t>())
+            .AddAttribute ("HashRate", 
+                                "The hash rate of the selfish miner",
+                                ns3::DoubleValue (0.2),
+                                ns3::MakeDoubleAccessor (&SelfishMiner::m_hashRate),
+                                ns3::MakeDoubleChecker<double> ())
+            .AddAttribute ("AverageBlockGenIntervalSeconds", 
+                                "The average block generation interval we aim at (in seconds)",
+                                ns3::DoubleValue (10*60),
+                                ns3::MakeDoubleAccessor (&SelfishMiner::m_averageBlockGenIntervalSeconds),
+                                ns3::MakeDoubleChecker<double> ());	
 
-        return tid;
+            return tid;
     }
 
     SelfishMiner::SelfishMiner()

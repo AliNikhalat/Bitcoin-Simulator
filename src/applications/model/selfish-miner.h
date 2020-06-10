@@ -3,7 +3,7 @@
 
 #include "bitcoin-miner.h"
 
-namespace blockchain_attacks
+namespace blockchain_attacks 
 {
     class ns3::Address;
     class ns3::Socket;
