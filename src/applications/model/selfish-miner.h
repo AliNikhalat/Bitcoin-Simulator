@@ -17,6 +17,11 @@ namespace blockchain_attacks
         SelfishMiner();
 
     protected:
+        virtual void StartApplication(void); 
+        virtual void StopApplication(void);
+
+        virtual void DoDispose(void);
+
     private:
     };
 };

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <time.h>
+#include <sys/time.h>
 
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
@@ -17,6 +19,7 @@ NS_LOG_COMPONENT_DEFINE("selfish-miner-main");
 
 void getParametersFromCMD(int argc, char *argv[]);
 void printInputStatics();
+double get_wall_time();
 
 using namespace ns3;
 
@@ -45,6 +48,12 @@ int main(int argc, char *argv[])
 
     double averageBlockGenIntervalSeconds = 10 * secsPerMin; //seconds
     double averageBlockGenIntervalMinutes = averageBlockGenIntervalSeconds / secsPerMin;
+
+    int start = 0;
+    double stop = blockNumber * averageBlockGenIntervalMinutes;
+
+    double tSimStart = 0;
+    double tSimFinish = 0;
 
     long blockSize = 450000 * averageBlockGenIntervalMinutes / realAverageBlockGenIntervalMinutes;
 
@@ -90,9 +99,22 @@ int main(int argc, char *argv[])
             if(attackerId == miner){
                 std::cout << "attacker id is : " << attackerId << std::endl;
                 bitcoinMinerHelper.SetMinerType(MY_SELFISH_MINER);
-                std::cout << "set miner type to selfish miner" << std::endl;
             }
+
+            bitcoinMiners.Add(bitcoinMinerHelper.Install(targetNode));
         }
+
+        bitcoinMiners.Start(Seconds(start));
+        bitcoinMiners.Stop(Minutes(stop));
+
+        Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+
+        Simulator::Stop(Minutes(stop + 0.1));
+
+        tSimStart = get_wall_time();
+        Simulator::Run();
+        Simulator::Destroy();
+        tSimFinish = get_wall_time();
     }
 
     return 0;
@@ -114,4 +136,15 @@ void printInputStatics()
     std::cout << "number of blocks is : " << blockNumber << std::endl;
     std::cout << "block interval in minutes is : " << blockIntervalMinutes << std::endl;
     std::cout << "number of iteration is : " << iterations << std::endl;
+}
+
+double get_wall_time()
+{
+    struct timeval time;
+    if (gettimeofday(&time, NULL))
+    {
+        //  Handle error
+        return 0;
+    }
+    return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }

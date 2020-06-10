@@ -109,7 +109,9 @@ BitcoinMinerHelper::InstallPriv (Ptr<Node> node) //FIX ME
         app->SetProtocolType(m_protocolType);
 
         node->AddApplication(app);
-        
+
+        std::cout << "Installing My Selfish Miner finished!" << std::endl;
+
         return app;
       }
    }
@@ -160,7 +162,6 @@ BitcoinMinerHelper::SetMinerType (enum MinerType m)  //FIX ME
       }
       case MY_SELFISH_MINER:
       {
-        std::cout << "Setting TypeId for Selfish Miner" << std::endl;
         m_factory.SetTypeId("blockchain_attacks::SelfishMiner");
         SetFactoryAttributes();
 

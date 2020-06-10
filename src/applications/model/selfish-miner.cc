@@ -70,5 +70,28 @@ namespace blockchain_attacks{
     SelfishMiner::SelfishMiner()
     {
         NS_LOG_FUNCTION(this);
+
+        std::cout << "running constructor" << std::endl;
+    }
+
+    void SelfishMiner::StartApplication(void)
+    {
+        std::cout << "Start Selfish Mining" << std::endl;
+
+        return;
+    }
+
+    void SelfishMiner::StopApplication(void)
+    {
+        std::cout << "Start Selfish Mining" << std::endl;
+
+        return;
+    }
+
+    void SelfishMiner::DoDispose(void)
+    {
+        std::cout << "Disposing Selfish miner" << std::endl;
+        
+        return;
     }
 }
