@@ -78,6 +78,11 @@ namespace blockchain_attacks{
     {
         std::cout << "Start Selfish Mining" << std::endl;
 
+        m_nodeStats->hashRate = m_hashRate;
+        m_nodeStats->miner = 1;
+
+        ScheduleNextMiningEvent();
+
         return;
     }
 
