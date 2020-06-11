@@ -100,7 +100,42 @@ namespace blockchain_attacks{
     {
         std::cout << "Mine a Selfish Block" << std::endl;
 
+        int height = m_topBlock.GetBlockHeight() + 1;
+        int minerId = GetNode()->GetId();
+        int parentBlockMinerId = m_topBlock.GetMinerId();
+        double currentTime = ns3::Simulator::Now().GetSeconds();
 
+        std::ostringstream stringStream;
+        std::string blockHash;
+        stringStream << height << "/" << minerId;
+        blockHash = stringStream.str();
+
+        if (m_fixedBlockSize > 0)
+            m_nextBlockSize = m_fixedBlockSize;
+        else
+        {
+            m_nextBlockSize = m_blockSizeDistribution(m_generator) * 1000; 
+
+            if (m_cryptocurrency == ns3::BITCOIN)
+            {
+                // The block size is linearly dependent on the averageBlockGenIntervalSeconds
+                if (m_nextBlockSize < m_maxBlockSize - m_headersSizeBytes)
+                    m_nextBlockSize = m_nextBlockSize * m_averageBlockGenIntervalSeconds / m_realAverageBlockGenIntervalSeconds + m_headersSizeBytes;
+                else
+                    m_nextBlockSize = m_nextBlockSize * m_averageBlockGenIntervalSeconds / m_realAverageBlockGenIntervalSeconds;
+            }
+        }
+
+        if (m_nextBlockSize < m_averageTransactionSize)
+            m_nextBlockSize = m_averageTransactionSize + m_headersSizeBytes;
+
+        ns3::Block newBlock(height, minerId, parentBlockMinerId, m_nextBlockSize,
+                       currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
+
+        m_privateChain.push_back(newBlock);
+        updateTopBlock();
+
+        
 
         return;
     }
