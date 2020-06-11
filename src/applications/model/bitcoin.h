@@ -202,6 +202,8 @@ public:
   
   friend bool operator== (const Block &block1, const Block &block2);
   friend std::ostream& operator<< (std::ostream &out, const Block &block);
+
+  std::string ToString() const;
   
 protected:	
   int           m_blockHeight;                // The height of the block
