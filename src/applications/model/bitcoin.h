@@ -139,6 +139,8 @@ typedef struct {
   long     blockTimeouts;
   long     chunkTimeouts;
   int      minedBlocksInMainChain;
+  long     selfishMinerWinBlock;
+  long     honestMinerWinBlock;
 } nodeStatistics;
 
 
