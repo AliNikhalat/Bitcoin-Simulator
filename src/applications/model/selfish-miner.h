@@ -1,6 +1,8 @@
 #ifndef SELFISH_MINER_H
 #define SELFISH_MINER_H
 
+#include <vector>
+
 #include "bitcoin-miner.h"
 
 namespace blockchain_attacks 
@@ -25,6 +27,10 @@ namespace blockchain_attacks
         virtual void DoDispose(void);
 
     private:
+        std::vector<ns3::Block> m_privateChain;
+        ns3::Block m_topBlock;
+
+        void updateTopBlock(void);
     };
 };
 

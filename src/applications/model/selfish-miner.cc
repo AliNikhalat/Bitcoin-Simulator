@@ -70,8 +70,8 @@ namespace blockchain_attacks{
     SelfishMiner::SelfishMiner()
     {
         NS_LOG_FUNCTION(this);
-
-        std::cout << "running constructor" << std::endl;
+        
+        updateTopBlock();
     }
 
     void SelfishMiner::StartApplication(void)
@@ -100,6 +100,8 @@ namespace blockchain_attacks{
     {
         std::cout << "Mine a Selfish Block" << std::endl;
 
+
+
         return;
     }
 
@@ -107,6 +109,21 @@ namespace blockchain_attacks{
     {
         std::cout << "Disposing Selfish miner" << std::endl;
         
+        return;
+    }
+
+    void SelfishMiner::updateTopBlock(void)
+    {
+        std::cout << "Updating Top Block" << std::endl;
+
+        if(m_privateChain.size() == 0){
+            m_topBlock = *(m_blockchain.GetCurrentTopBlock());
+
+            return;
+        }
+
+        m_topBlock = m_privateChain[m_privateChain.size() - 1];
+
         return;
     }
 }
