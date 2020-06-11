@@ -412,6 +412,7 @@ BitcoinMiner::ScheduleNextMiningEvent (void)
 void 
 BitcoinMiner::MineBlock (void)
 {
+  std::cout << "honest number : " << m_hashRate  << " mine a block" << std::endl;
   NS_LOG_FUNCTION (this);
   rapidjson::Document inv; 
   rapidjson::Document block; 

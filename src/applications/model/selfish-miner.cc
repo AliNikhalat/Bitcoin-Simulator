@@ -90,7 +90,7 @@ namespace blockchain_attacks{
 
     void SelfishMiner::MineBlock(void)
     {
-        std::cout << "Mine a Block" << std::endl;
+        std::cout << "Mine a Selfish Block" << std::endl;
 
         return;
     }

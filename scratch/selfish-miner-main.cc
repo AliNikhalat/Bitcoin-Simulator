@@ -87,19 +87,26 @@ int main(int argc, char *argv[])
         peersUploadSpeeds = bitcoinTopologyHelper.GetPeersUploadSpeeds();
         nodesInternetSpeeds = bitcoinTopologyHelper.GetNodesInternetSpeeds();
 
-        BitcoinMinerHelper bitcoinMinerHelper("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), bitcoinPort),
-                                              nodesConnections[miners[0]], noMiners, peersDownloadSpeeds[0], peersUploadSpeeds[0], nodesInternetSpeeds[0],
-                                              nodeStatic, minersHash[0], averageBlockGenIntervalSeconds);
         ApplicationContainer bitcoinMiners;
 
         for(size_t i{0}; i < noMiners; i++){
             auto miner = miners[i];
             Ptr<Node> targetNode = bitcoinTopologyHelper.GetNode(miner);
-            
+
+            BitcoinMinerHelper bitcoinMinerHelper("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), bitcoinPort),
+                                                  nodesConnections[miner], noMiners, peersDownloadSpeeds[miner], peersUploadSpeeds[miner], nodesInternetSpeeds[miner],
+                                                  nodeStatic, minersHash[miner], averageBlockGenIntervalSeconds);
+
             if(attackerId == miner){
                 std::cout << "attacker id is : " << attackerId << std::endl;
                 bitcoinMinerHelper.SetMinerType(MY_SELFISH_MINER);
             }
+
+            bitcoinMinerHelper.SetPeersAddresses(nodesConnections[miner]);
+            bitcoinMinerHelper.SetPeersDownloadSpeeds(peersDownloadSpeeds[miner]);
+            bitcoinMinerHelper.SetPeersUploadSpeeds(peersUploadSpeeds[miner]);
+            bitcoinMinerHelper.SetNodeInternetSpeeds(nodesInternetSpeeds[miner]);
+            bitcoinMinerHelper.SetNodeStats(&nodeStatic[miner]);
 
             bitcoinMiners.Add(bitcoinMinerHelper.Install(targetNode));
         }
