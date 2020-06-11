@@ -90,6 +90,9 @@ namespace blockchain_attacks{
     {
         std::cout << "Stop Selfish Mining" << std::endl;
 
+        BitcoinNode::StopApplication();
+        ns3::Simulator::Cancel(m_nextMiningEvent);
+
         return;
     }
 
