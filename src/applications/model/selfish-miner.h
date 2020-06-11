@@ -20,6 +20,8 @@ namespace blockchain_attacks
         virtual void StartApplication(void); 
         virtual void StopApplication(void);
 
+        virtual void MineBlock(void);
+
         virtual void DoDispose(void);
 
     private:

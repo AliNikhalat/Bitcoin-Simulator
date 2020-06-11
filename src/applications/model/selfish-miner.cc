@@ -83,7 +83,14 @@ namespace blockchain_attacks{
 
     void SelfishMiner::StopApplication(void)
     {
-        std::cout << "Start Selfish Mining" << std::endl;
+        std::cout << "Stop Selfish Mining" << std::endl;
+
+        return;
+    }
+
+    void SelfishMiner::MineBlock(void)
+    {
+        std::cout << "Mine a Block" << std::endl;
 
         return;
     }
