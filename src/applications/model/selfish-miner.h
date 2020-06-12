@@ -36,6 +36,7 @@ namespace blockchain_attacks
         SelfishMinerStatus* m_selfishMinerStatus;
 
         void updateTopBlock(void);
+        void updateDelta(void);
     };
 };
 

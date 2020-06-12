@@ -170,4 +170,26 @@ namespace blockchain_attacks{
 
         return;
     }
+
+    void SelfishMiner::updateDelta(void)
+    {
+        std::cout << "updating delta" << std::endl;
+
+        if(m_privateChain.size() != 0)
+        {
+            int delta = m_selfishTopBlock.GetBlockHeight() - m_honestTopBlock.GetBlockHeight();
+            if(delta >= 0){
+                m_selfishMinerStatus->Delta = m_selfishTopBlock.GetBlockHeight() - m_honestTopBlock.GetBlockHeight();
+            }
+            else{
+                m_selfishMinerStatus->Delta = 0;
+            }
+
+            return;
+        }
+
+        m_selfishMinerStatus->Delta = 0;
+
+        return;
+    }
 }
