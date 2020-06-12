@@ -88,16 +88,6 @@ namespace blockchain_attacks{
         return;
     }
 
-    void SelfishMiner::StopApplication(void)
-    {
-        std::cout << "Stop Selfish Mining" << std::endl;
-
-        BitcoinNode::StopApplication();
-        ns3::Simulator::Cancel(m_nextMiningEvent);
-
-        return;
-    }
-
     void SelfishMiner::MineBlock(void)
     {
         std::cout << "Mine a Selfish Block" << std::endl;
@@ -144,6 +134,16 @@ namespace blockchain_attacks{
             ReleaseChain(m_privateChain);
             updateDelta();
         }        
+
+        return;
+    }
+
+    void SelfishMiner::StopApplication(void)
+    {
+        std::cout << "Stop Selfish Mining" << std::endl;
+
+        BitcoinNode::StopApplication();
+        ns3::Simulator::Cancel(m_nextMiningEvent);
 
         return;
     }

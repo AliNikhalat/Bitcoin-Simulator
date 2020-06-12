@@ -21,13 +21,14 @@ namespace blockchain_attacks
 
     protected:
         virtual void StartApplication(void); 
-        virtual void StopApplication(void);
 
         virtual void MineBlock(void);
 
-        virtual void DoDispose(void);
-
         void ReleaseChain(std::vector<ns3::Block> blocks);
+
+        virtual void StopApplication(void);
+
+        virtual void DoDispose(void);
 
     private:
         std::vector<ns3::Block> m_privateChain;
