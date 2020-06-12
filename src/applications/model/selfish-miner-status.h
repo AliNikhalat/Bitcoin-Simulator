@@ -8,6 +8,7 @@ namespace blockchain_attacks{
         long MinedBlock;
         long SelfishMinerWinBlock;
         long HonestMinerWinBlock;
+        long Delta;
     } SelfishMinerStatus;
     
 }
