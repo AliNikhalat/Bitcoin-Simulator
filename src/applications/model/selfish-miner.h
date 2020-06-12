@@ -24,7 +24,9 @@ namespace blockchain_attacks
 
         virtual void MineBlock(void);
 
-        void ReleaseChain(std::vector<ns3::Block> blocks);
+        virtual void ReleaseChain(std::vector<ns3::Block> blocks);
+
+        virtual void ReceiveBlock(const ns3::Block &newBlock);
 
         virtual void StopApplication(void);
 

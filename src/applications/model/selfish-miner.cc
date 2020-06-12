@@ -138,23 +138,6 @@ namespace blockchain_attacks{
         return;
     }
 
-    void SelfishMiner::StopApplication(void)
-    {
-        std::cout << "Stop Selfish Mining" << std::endl;
-
-        BitcoinNode::StopApplication();
-        ns3::Simulator::Cancel(m_nextMiningEvent);
-
-        return;
-    }
-
-    void SelfishMiner::DoDispose(void)
-    {
-        std::cout << "Disposing Selfish miner" << std::endl;
-        
-        return;
-    }
-
     void SelfishMiner::ReleaseChain(std::vector<ns3::Block> blocks)
     {
         std::cout << "Releasing Chain" << std::endl;
@@ -264,6 +247,30 @@ namespace blockchain_attacks{
                 }
             }
         }
+    }
+
+    void SelfishMiner::ReceiveBlock(const ns3::Block &newBlock)
+    {
+        std::cout << "Receiving a New Block" << std::endl;
+
+        return;
+    }
+
+    void SelfishMiner::StopApplication(void)
+    {
+        std::cout << "Stop Selfish Mining" << std::endl;
+
+        BitcoinNode::StopApplication();
+        ns3::Simulator::Cancel(m_nextMiningEvent);
+
+        return;
+    }
+
+    void SelfishMiner::DoDispose(void)
+    {
+        std::cout << "Disposing Selfish miner" << std::endl;
+
+        return;
     }
 
     void SelfishMiner::updateTopBlock(void)
