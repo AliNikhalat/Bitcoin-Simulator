@@ -74,6 +74,11 @@ namespace blockchain_attacks{
         this->m_selfishMinerStatus = selfishMinerStatus;
 
         updateTopBlock();
+
+        auto peers = GetPeersAddresses();
+        for(const auto& peer : peers){
+            std::cout << peer << std::endl;
+        }
     }
 
     void SelfishMiner::StartApplication(void)
@@ -208,8 +213,8 @@ namespace blockchain_attacks{
         rapidjson::Writer<rapidjson::StringBuffer> invWriter(invInfo);
         inv.Accept(invWriter);
 
-        rapidjson::StringBuffer blockInfo;
-        rapidjson::Writer<rapidjson::StringBuffer> blockWriter(blockInfo);
+        rapidjson::StringBuffer blockInfoBuffer;
+        rapidjson::Writer<rapidjson::StringBuffer> blockWriter(blockInfoBuffer);
         block.Accept(blockWriter);
 
         int count = 0;
