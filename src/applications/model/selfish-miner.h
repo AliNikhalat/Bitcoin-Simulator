@@ -27,6 +27,8 @@ namespace blockchain_attacks
 
         virtual void DoDispose(void);
 
+        void ReleaseChain(std::vector<ns3::Block> blocks);
+
     private:
         std::vector<ns3::Block> m_privateChain;
         ns3::Block m_topBlock;

@@ -154,6 +154,117 @@ namespace blockchain_attacks{
         return;
     }
 
+    void SelfishMiner::ReleaseChain(std::vector<ns3::Block> blocks)
+    {
+        std::cout << "Releasing Chain" << std::endl;
+
+        rapidjson::Document inv;
+        rapidjson::Document block;
+
+        inv.SetObject();
+        block.SetObject();
+
+        rapidjson::Value value;
+        rapidjson::Value array(rapidjson::kArrayType);
+        rapidjson::Value blockInfo(rapidjson::kObjectType);
+
+        value.SetString("block"); //Remove
+        inv.AddMember("type", value, inv.GetAllocator());
+
+        if (m_protocolType == ns3::STANDARD_PROTOCOL)
+        {
+            value = ns3::INV;
+            inv.AddMember("message", value, inv.GetAllocator());
+
+            for (auto it = blocks.begin(); it != blocks.end(); it++)
+            {
+                std::ostringstream stringStream;
+                std::string blockHash = stringStream.str();
+
+                stringStream << it->GetBlockHeight() << "/" << it->GetMinerId();
+                blockHash = stringStream.str();
+                value.SetString(blockHash.c_str(), blockHash.size(), inv.GetAllocator());
+                array.PushBack(value, inv.GetAllocator());
+            }
+
+            inv.AddMember("inv", array, inv.GetAllocator());
+        }
+        else if (m_protocolType == ns3::SENDHEADERS)
+        {
+            value = ns3::HEADERS;
+            inv.AddMember("message", value, inv.GetAllocator());
+
+            for (auto it = blocks.begin(); it != blocks.end(); it++)
+            {
+                value = it->GetBlockHeight();
+                blockInfo.AddMember("height", value, inv.GetAllocator());
+
+                value = it->GetMinerId();
+                blockInfo.AddMember("minerId", value, inv.GetAllocator());
+
+                value = it->GetParentBlockMinerId();
+                blockInfo.AddMember("parentBlockMinerId", value, inv.GetAllocator());
+
+                value = it->GetBlockSizeBytes();
+                blockInfo.AddMember("size", value, inv.GetAllocator());
+
+                value = it->GetTimeCreated();
+                blockInfo.AddMember("timeCreated", value, inv.GetAllocator());
+
+                value = it->GetTimeReceived();
+                blockInfo.AddMember("timeReceived", value, inv.GetAllocator());
+
+                array.PushBack(blockInfo, inv.GetAllocator());
+            }
+
+            inv.AddMember("blocks", array, inv.GetAllocator());
+        }
+
+        rapidjson::StringBuffer invInfo;
+        rapidjson::Writer<rapidjson::StringBuffer> invWriter(invInfo);
+        inv.Accept(invWriter);
+
+        rapidjson::StringBuffer blockInfo;
+        rapidjson::Writer<rapidjson::StringBuffer> blockWriter(blockInfo);
+        block.Accept(blockWriter);
+
+        int count = 0;
+
+        for (std::vector<ns3::Ipv4Address>::const_iterator i = m_peersAddresses.begin(); i != m_peersAddresses.end(); ++i, ++count)
+        {
+
+            const uint8_t delimiter[] = "#";
+
+            m_peersSockets[*i]->Send(reinterpret_cast<const uint8_t *>(invInfo.GetString()), invInfo.GetSize(), 0);
+            m_peersSockets[*i]->Send(delimiter, 1, 0);
+
+            if (m_protocolType == ns3::STANDARD_PROTOCOL && !m_blockTorrent)
+                m_nodeStats->invSentBytes += m_bitcoinMessageHeader + m_countBytes + inv["inv"].Size() * m_inventorySizeBytes;
+            else if (m_protocolType == ns3::SENDHEADERS && !m_blockTorrent)
+                m_nodeStats->headersSentBytes += m_bitcoinMessageHeader + m_countBytes + inv["blocks"].Size() * m_headersSizeBytes;
+            else if (m_protocolType == ns3::STANDARD_PROTOCOL && m_blockTorrent)
+            {
+                m_nodeStats->extInvSentBytes += m_bitcoinMessageHeader + m_countBytes + inv["inv"].Size() * m_inventorySizeBytes;
+                for (int j = 0; j < inv["inv"].Size(); j++)
+                {
+                    m_nodeStats->extInvSentBytes += 5; //1Byte(fullBlock) + 4Bytes(numberOfChunks)
+                    if (!inv["inv"][j]["fullBlock"].GetBool())
+                        m_nodeStats->extInvSentBytes += inv["inv"][j]["availableChunks"].Size() * 1;
+                }
+            }
+            else if (m_protocolType == ns3::SENDHEADERS && m_blockTorrent)
+            {
+                m_nodeStats->extHeadersSentBytes += m_bitcoinMessageHeader + m_countBytes + inv["blocks"].Size() * m_headersSizeBytes;
+                for (int j = 0; j < inv["blocks"].Size(); j++)
+                {
+                    m_nodeStats->extHeadersSentBytes += 1; //fullBlock
+                    if (!inv["blocks"][j]["fullBlock"].GetBool())
+                        m_nodeStats->extHeadersSentBytes += inv["inv"][j]["availableChunks"].Size();
+                }
+            }
+        }
+    }
+
     void SelfishMiner::updateTopBlock(void)
     {
         std::cout << "Updating Top Block" << std::endl;
