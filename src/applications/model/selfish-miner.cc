@@ -67,10 +67,12 @@ namespace blockchain_attacks{
             return tid;
     }
 
-    SelfishMiner::SelfishMiner()
+    SelfishMiner::SelfishMiner(SelfishMinerStatus* selfishMinerStatus)
     {
         NS_LOG_FUNCTION(this);
         
+        this->m_selfishMinerStatus = selfishMinerStatus;
+
         updateTopBlock();
     }
 
