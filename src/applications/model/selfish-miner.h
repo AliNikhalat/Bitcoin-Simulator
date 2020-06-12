@@ -37,6 +37,8 @@ namespace blockchain_attacks
 
         void updateTopBlock(void);
         void updateDelta(void);
+
+        int GetSelfishChainLength(void);
     };
 };
 

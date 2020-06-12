@@ -135,9 +135,14 @@ namespace blockchain_attacks{
                        currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
 
         m_privateChain.push_back(newBlock);
+
+        updateDelta();
         updateTopBlock();
 
-        
+        if(m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 2){
+            m_selfishMinerStatus->SelfishMinerWinBlock += 2;
+            
+        }        
 
         return;
     }
@@ -191,5 +196,10 @@ namespace blockchain_attacks{
         m_selfishMinerStatus->Delta = 0;
 
         return;
+    }
+
+    int SelfishMiner::GetSelfishChainLength(void)
+    {
+        return m_privateChain.size();
     }
 }
