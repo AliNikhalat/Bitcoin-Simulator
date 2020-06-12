@@ -141,7 +141,8 @@ namespace blockchain_attacks{
 
         if(m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 2){
             m_selfishMinerStatus->SelfishMinerWinBlock += 2;
-            
+            ReleaseChain(m_privateChain);
+            updateDelta();
         }        
 
         return;
