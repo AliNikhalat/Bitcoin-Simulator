@@ -153,13 +153,20 @@ namespace blockchain_attacks{
     {
         std::cout << "Updating Top Block" << std::endl;
 
-        if(m_privateChain.size() == 0){
-            m_topBlock = *(m_blockchain.GetCurrentTopBlock());
-
+        if(m_blockchain.GetBlockchainHeight() == 0){
             return;
         }
 
-        m_topBlock = m_privateChain[m_privateChain.size() - 1];
+        m_honestTopBlock = *(m_blockchain.GetCurrentTopBlock());
+
+        if(m_privateChain.size() == 0){
+            m_topBlock = m_honestTopBlock;
+            
+            return;
+        }
+
+        m_selfishTopBlock = m_privateChain[m_privateChain.size() - 1];
+        m_topBlock = m_selfishTopBlock;
 
         return;
     }
