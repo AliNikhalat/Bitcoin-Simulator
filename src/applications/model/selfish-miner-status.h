@@ -5,9 +5,9 @@ namespace blockchain_attacks{
 
     typedef struct
     {
-        long MinedBlock;
-        long SelfishMinerWinBlock;
-        long HonestMinerWinBlock;
+        int MinedBlock;
+        int SelfishMinerWinBlock;
+        int HonestMinerWinBlock;
         int Delta;
     } SelfishMinerStatus;
     

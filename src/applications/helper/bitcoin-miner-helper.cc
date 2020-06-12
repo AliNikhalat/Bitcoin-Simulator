@@ -107,6 +107,7 @@ BitcoinMinerHelper::InstallPriv (Ptr<Node> node) //FIX ME
         app->SetNodeStats(m_nodeStats);
         app->SetBlockBroadcastType(m_blockBroadcastType);
         app->SetProtocolType(m_protocolType);
+        app->SetStatus(m_selfishMinerStatus);
 
         node->AddApplication(app);
 
@@ -192,6 +193,13 @@ BitcoinMinerHelper::SetFactoryAttributes (void)
     m_factory.Set ("BlockGenBinSize", DoubleValue(m_blockGenBinSize));
     m_factory.Set ("BlockGenParameter", DoubleValue(m_blockGenParameter));
   }
+}
+
+void BitcoinMinerHelper::SetSelfishStatus(blockchain_attacks::SelfishMinerStatus selfishMinerStatus)
+{
+  m_selfishMinerStatus = selfishMinerStatus;
+
+  return;
 }
 
 } // namespace ns3

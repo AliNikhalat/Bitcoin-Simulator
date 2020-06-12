@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "bitcoin-miner.h"
-#include "selfish-miner-status.h"
+#include "ns3/bitcoin-miner.h"
+#include "ns3/selfish-miner-status.h"
 
 namespace blockchain_attacks 
 {
@@ -17,7 +17,9 @@ namespace blockchain_attacks
     public:
         static ns3::TypeId GetTypeId(void);
 
-        SelfishMiner(SelfishMinerStatus* selfishMinerStatus);
+        SelfishMiner();
+
+        void SetStatus(SelfishMinerStatus selfishMinerStatus);
 
     protected:
         virtual void StartApplication(void); 
@@ -38,7 +40,7 @@ namespace blockchain_attacks
         ns3::Block m_selfishTopBlock;
         ns3::Block m_honestTopBlock;
 
-        SelfishMinerStatus* m_selfishMinerStatus;
+        SelfishMinerStatus m_selfishMinerStatus;
 
         void updateTopBlock(void);
         void updateDelta(void);

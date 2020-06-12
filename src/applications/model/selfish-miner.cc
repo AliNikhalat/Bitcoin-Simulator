@@ -1,4 +1,4 @@
-#include "selfish-miner.h"
+#include "ns3/selfish-miner.h"
 
 #include "ns3/address.h"
 #include "ns3/address-utils.h"
@@ -67,23 +67,25 @@ namespace blockchain_attacks{
             return tid;
     }
 
-    SelfishMiner::SelfishMiner(SelfishMinerStatus* selfishMinerStatus)
+    SelfishMiner::SelfishMiner()
     {
         NS_LOG_FUNCTION(this);
-        
-        this->m_selfishMinerStatus = selfishMinerStatus;
 
         updateTopBlock();
+    }
 
-        auto peers = GetPeersAddresses();
-        for(const auto& peer : peers){
-            std::cout << peer << std::endl;
-        }
+    void SelfishMiner::SetStatus(SelfishMinerStatus selfishMinerStatus)
+    {
+        m_selfishMinerStatus = selfishMinerStatus;
+
+        return;
     }
 
     void SelfishMiner::StartApplication(void)
     {
         std::cout << "Start Selfish Mining" << std::endl;
+
+        BitcoinNode::StartApplication();
 
         m_nodeStats->hashRate = m_hashRate;
         m_nodeStats->miner = 1;
@@ -134,8 +136,8 @@ namespace blockchain_attacks{
         updateDelta();
         updateTopBlock();
 
-        if(m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 2){
-            m_selfishMinerStatus->SelfishMinerWinBlock += 2;
+        if(m_selfishMinerStatus.Delta == 0 && GetSelfishChainLength() == 2){
+            m_selfishMinerStatus.SelfishMinerWinBlock += 2;
             ReleaseChain(m_privateChain);
             updateDelta();
         }        
@@ -264,9 +266,10 @@ namespace blockchain_attacks{
     void SelfishMiner::StopApplication(void)
     {
         std::cout << "Stop Selfish Mining" << std::endl;
-
+        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
         BitcoinNode::StopApplication();
         ns3::Simulator::Cancel(m_nextMiningEvent);
+        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!8" << std::endl;
 
         return;
     }
@@ -282,20 +285,22 @@ namespace blockchain_attacks{
     {
         std::cout << "Updating Top Block" << std::endl;
 
-        if(m_blockchain.GetBlockchainHeight() == 0){
-            return;
-        }
+        // if(m_blockchain.GetBlockchainHeight() == 0){
+        //     return;
+        // }
 
-        m_honestTopBlock = *(m_blockchain.GetCurrentTopBlock());
+        // m_honestTopBlock = *(m_blockchain.GetCurrentTopBlock());
 
-        if(m_privateChain.size() == 0){
-            m_topBlock = m_honestTopBlock;
+        // if(m_privateChain.size() == 0){
+        //     m_topBlock = m_honestTopBlock;
             
-            return;
-        }
+        //     return;
+        // }
 
-        m_selfishTopBlock = m_privateChain[m_privateChain.size() - 1];
-        m_topBlock = m_selfishTopBlock;
+        // m_selfishTopBlock = m_privateChain[m_privateChain.size() - 1];
+        // m_topBlock = m_selfishTopBlock;
+
+        std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
 
         return;
     }
@@ -304,20 +309,22 @@ namespace blockchain_attacks{
     {
         std::cout << "updating delta" << std::endl;
 
-        if(m_privateChain.size() != 0)
-        {
-            int delta = m_selfishTopBlock.GetBlockHeight() - m_honestTopBlock.GetBlockHeight();
-            if(delta >= 0){
-                m_selfishMinerStatus->Delta = m_selfishTopBlock.GetBlockHeight() - m_honestTopBlock.GetBlockHeight();
-            }
-            else{
-                m_selfishMinerStatus->Delta = 0;
-            }
+        // if(m_privateChain.size() != 0)
+        // {
+        //     int delta = m_selfishTopBlock.GetBlockHeight() - m_honestTopBlock.GetBlockHeight();
+        //     if(delta >= 0){
+        //         m_selfishMinerStatus->Delta = m_selfishTopBlock.GetBlockHeight() - m_honestTopBlock.GetBlockHeight();
+        //     }
+        //     else{
+        //         m_selfishMinerStatus->Delta = 0;
+        //     }
 
-            return;
-        }
+        //     return;
+        // }
 
-        m_selfishMinerStatus->Delta = 0;
+        // m_selfishMinerStatus->Delta = 0;
+
+        std::cout << "**************************" << std::endl;
 
         return;
     }

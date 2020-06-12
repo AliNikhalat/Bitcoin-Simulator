@@ -11,6 +11,8 @@
 
 #include "ns3/bitcoin.h"
 
+#include "ns3/selfish-miner-status.h"
+
 uint blockIntervalMinutes;
 uint blockNumber = 1;
 uint iterations = 1;
@@ -58,6 +60,12 @@ int main(int argc, char *argv[])
     long blockSize = 450000 * averageBlockGenIntervalMinutes / realAverageBlockGenIntervalMinutes;
 
     nodeStatistics* nodeStatic = new nodeStatistics[totalNoNodes];
+    auto selfishStatus = blockchain_attacks::SelfishMinerStatus();
+
+    selfishStatus.Delta = 0;
+    selfishStatus.HonestMinerWinBlock = 0;
+    selfishStatus.SelfishMinerWinBlock = 0;
+    selfishStatus.MinedBlock = 0;
 
     srand(1000);
     Time::SetResolution(Time::NS);
@@ -94,12 +102,13 @@ int main(int argc, char *argv[])
             Ptr<Node> targetNode = bitcoinTopologyHelper.GetNode(miner);
 
             BitcoinMinerHelper bitcoinMinerHelper("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), bitcoinPort),
-                                                  nodesConnections[miner], noMiners, peersDownloadSpeeds[miner], peersUploadSpeeds[miner], nodesInternetSpeeds[miner],
-                                                  nodeStatic, minersHash[miner], averageBlockGenIntervalSeconds);
+                                                  nodesConnections[miner], noMiners, peersDownloadSpeeds[miner], peersUploadSpeeds[miner],
+                                                  nodesInternetSpeeds[miner], nodeStatic, minersHash[miner], averageBlockGenIntervalSeconds);
 
             if(attackerId == miner){
                 std::cout << "attacker id is : " << attackerId << std::endl;
                 bitcoinMinerHelper.SetMinerType(MY_SELFISH_MINER);
+                bitcoinMinerHelper.SetSelfishStatus(selfishStatus);
             }
 
             bitcoinMinerHelper.SetPeersAddresses(nodesConnections[miner]);
