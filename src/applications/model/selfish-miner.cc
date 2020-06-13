@@ -133,13 +133,13 @@ namespace blockchain_attacks{
 
         m_privateChain.push_back(newBlock);
 
-        updateDelta();
+        //updateDelta();
         updateTopBlock();
 
         if(m_selfishMinerStatus.Delta == 0 && GetSelfishChainLength() == 2){
             m_selfishMinerStatus.SelfishMinerWinBlock += 2;
             ReleaseChain(m_privateChain);
-            updateDelta();
+            //updateDelta();
         }        
 
         return;
@@ -258,18 +258,17 @@ namespace blockchain_attacks{
 
     void SelfishMiner::ReceiveBlock(const ns3::Block &newBlock)
     {
-        std::cout << "Receiving a New Block" << std::endl;
+        //std::cout << "Receiving a New Block" << newBlock.GetBlockHeight() << std::endl;
 
         return;
     }
 
     void SelfishMiner::StopApplication(void)
     {
-        std::cout << "Stop Selfish Mining" << std::endl;
-        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        NS_LOG_INFO("Stop Selfish Mining");
+
         BitcoinNode::StopApplication();
         ns3::Simulator::Cancel(m_nextMiningEvent);
-        std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!8" << std::endl;
 
         return;
     }
@@ -285,20 +284,13 @@ namespace blockchain_attacks{
     {
         std::cout << "Updating Top Block" << std::endl;
 
-        // if(m_blockchain.GetBlockchainHeight() == 0){
-        //     return;
-        // }
+        if(m_privateChain.size() != 0){
+            m_topBlock = m_privateChain[m_privateChain.size() - 1];
 
-        // m_honestTopBlock = *(m_blockchain.GetCurrentTopBlock());
+            return;
+        }
 
-        // if(m_privateChain.size() == 0){
-        //     m_topBlock = m_honestTopBlock;
-            
-        //     return;
-        // }
-
-        // m_selfishTopBlock = m_privateChain[m_privateChain.size() - 1];
-        // m_topBlock = m_selfishTopBlock;
+        m_topBlock = *(m_blockchain.GetCurrentTopBlock());
 
         std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
 
