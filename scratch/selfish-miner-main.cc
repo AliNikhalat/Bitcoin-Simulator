@@ -21,6 +21,7 @@ NS_LOG_COMPONENT_DEFINE("selfish-miner-main");
 
 void getParametersFromCMD(int argc, char *argv[]);
 void printInputStatics();
+void printSelfishAttackStatus(blockchain_attacks::SelfishMinerStatus selfishMinerStatus);
 double get_wall_time();
 
 using namespace ns3;
@@ -131,6 +132,8 @@ int main(int argc, char *argv[])
         Simulator::Run();
         Simulator::Destroy();
         tSimFinish = get_wall_time();
+
+        printSelfishAttackStatus(selfishStatus);
     }
 
     return 0;
@@ -163,4 +166,14 @@ double get_wall_time()
         return 0;
     }
     return (double)time.tv_sec + (double)time.tv_usec * .000001;
+}
+
+void printSelfishAttackStatus(blockchain_attacks::SelfishMinerStatus selfishMinerStatus)
+{
+    std::cout << "*****************Selfish Attack Status*********************" << std::endl;
+    std::cout << "Mined Block Number : " << selfishMinerStatus.MinedBlock << std::endl;
+    std::cout << "Honest Miner Win Block : " << selfishMinerStatus.HonestMinerWinBlock << std::endl;
+    std::cout << "Selfish Miner Win Block : " << selfishMinerStatus.SelfishMinerWinBlock << std::endl;
+
+    return;
 }
