@@ -32,6 +32,7 @@ namespace blockchain_attacks
 
     private:
         std::vector<ns3::Block> m_privateChain;
+        std::vector<ns3::Block> m_publicChain;
         ns3::Block m_topBlock;
 
         SelfishMinerStatus* m_selfishMinerStatus;

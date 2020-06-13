@@ -190,14 +190,13 @@ namespace blockchain_attacks{
 
         m_privateChain.push_back(newBlock);
 
-        //updateDelta();
+        updateDelta();
         updateTopBlock();
 
         if(m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 2){
             m_selfishMinerStatus->SelfishMinerWinBlock += 2;
-            std::cout << "Adding..." << std::endl;
             ReleaseChain(m_privateChain);
-            //updateDelta();
+            updateDelta();
         }
 
         ns3::BitcoinMiner::ScheduleNextMiningEvent();
@@ -352,31 +351,31 @@ namespace blockchain_attacks{
 
         m_topBlock = *(m_blockchain.GetCurrentTopBlock());
 
-        std::cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
-
         return;
     }
 
     void SelfishMiner::updateDelta(void)
     {
-        std::cout << "updating delta" << std::endl;
+        NS_LOG_INFO("updating delta");
+        if (m_privateChain.size() > 0 && m_publicChain.size() > 0){
 
-        // if(m_privateChain.size() != 0)
-        // {
-        //     int delta = m_selfishTopBlock.GetBlockHeight() - m_honestTopBlock.GetBlockHeight();
-        //     if(delta >= 0){
-        //         m_selfishMinerStatus->Delta = m_selfishTopBlock.GetBlockHeight() - m_honestTopBlock.GetBlockHeight();
-        //     }
-        //     else{
-        //         m_selfishMinerStatus->Delta = 0;
-        //     }
+            int delta = m_privateChain[m_privateChain.size() - 1].GetBlockHeight() -
+                        m_publicChain[m_publicChain.size() - 1].GetBlockHeight();
 
-        //     return;
-        // }
-
-        // m_selfishMinerStatus->Delta = 0;
-
-        std::cout << "**************************" << std::endl;
+            if(delta >= 0){
+                m_selfishMinerStatus->Delta = delta;
+            }
+            else{
+                m_selfishMinerStatus->Delta = 0;
+            }
+        }
+        else if (m_privateChain.size() > 0 && m_publicChain.size() == 0)
+        {
+            m_selfishMinerStatus->Delta = m_privateChain[m_privateChain.size() - 1].GetBlockHeight();
+        }
+        else{
+            m_selfishMinerStatus->Delta = 0;
+        }
 
         return;
     }
