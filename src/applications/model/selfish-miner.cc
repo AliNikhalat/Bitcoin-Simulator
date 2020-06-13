@@ -90,7 +90,7 @@ namespace blockchain_attacks{
         updateTopBlock();
     }
 
-    void SelfishMiner::SetStatus(SelfishMinerStatus selfishMinerStatus)
+    void SelfishMiner::SetStatus(SelfishMinerStatus* selfishMinerStatus)
     {
         m_selfishMinerStatus = selfishMinerStatus;
 
@@ -154,6 +154,8 @@ namespace blockchain_attacks{
     {
         std::cout << "selfish number : " << m_hashRate << " mine a block" << std::endl;
 
+        m_selfishMinerStatus->MinedBlock ++;
+
         int height = m_topBlock.GetBlockHeight() + 1;
         int minerId = GetNode()->GetId();
         int parentBlockMinerId = m_topBlock.GetMinerId();
@@ -191,8 +193,9 @@ namespace blockchain_attacks{
         //updateDelta();
         updateTopBlock();
 
-        if(m_selfishMinerStatus.Delta == 0 && GetSelfishChainLength() == 2){
-            m_selfishMinerStatus.SelfishMinerWinBlock += 2;
+        if(m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 2){
+            m_selfishMinerStatus->SelfishMinerWinBlock += 2;
+            std::cout << "Adding..." << std::endl;
             ReleaseChain(m_privateChain);
             //updateDelta();
         }

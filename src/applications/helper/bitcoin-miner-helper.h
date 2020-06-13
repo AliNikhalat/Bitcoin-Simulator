@@ -46,7 +46,7 @@ class BitcoinMinerHelper : public BitcoinNodeHelper
   enum MinerType GetMinerType(void);
   void SetMinerType (enum MinerType m);
   void SetBlockBroadcastType (enum BlockBroadcastType m);
-  void SetSelfishStatus(blockchain_attacks::SelfishMinerStatus selfishMinerStatus);
+  void SetSelfishStatus(blockchain_attacks::SelfishMinerStatus* selfishMinerStatus);
 
 protected:
   /**
@@ -74,7 +74,7 @@ protected:
   uint32_t                  m_secureBlocks;
 
 private:
-  blockchain_attacks::SelfishMinerStatus m_selfishMinerStatus;
+  blockchain_attacks::SelfishMinerStatus* m_selfishMinerStatus;
 };
 
 } // namespace ns3

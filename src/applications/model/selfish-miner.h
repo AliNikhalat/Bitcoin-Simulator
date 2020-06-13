@@ -15,7 +15,7 @@ namespace blockchain_attacks
 
         SelfishMiner();
 
-        void SetStatus(SelfishMinerStatus selfishMinerStatus);
+        void SetStatus(SelfishMinerStatus* selfishMinerStatus);
 
     protected:
         virtual void StartApplication(void); 
@@ -34,7 +34,7 @@ namespace blockchain_attacks
         std::vector<ns3::Block> m_privateChain;
         ns3::Block m_topBlock;
 
-        SelfishMinerStatus m_selfishMinerStatus;
+        SelfishMinerStatus* m_selfishMinerStatus;
 
         void updateTopBlock(void);
         void updateDelta(void);

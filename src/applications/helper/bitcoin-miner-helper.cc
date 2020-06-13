@@ -195,7 +195,7 @@ BitcoinMinerHelper::SetFactoryAttributes (void)
   }
 }
 
-void BitcoinMinerHelper::SetSelfishStatus(blockchain_attacks::SelfishMinerStatus selfishMinerStatus)
+void BitcoinMinerHelper::SetSelfishStatus(blockchain_attacks::SelfishMinerStatus* selfishMinerStatus)
 {
   m_selfishMinerStatus = selfishMinerStatus;
 
