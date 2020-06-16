@@ -83,7 +83,7 @@ namespace blockchain_attacks{
             return tid;
     }
 
-    SelfishMiner::SelfishMiner()
+    SelfishMiner::SelfishMiner() : BitcoinMiner()
     {
         NS_LOG_FUNCTION(this);
 
