@@ -458,9 +458,8 @@ namespace blockchain_attacks{
                 m_selfishMinerStatus->Delta = 0;
             }
         }
-        else if (m_privateChain.size() > 0 && m_publicChain.size() == 0)
-        {
-            m_selfishMinerStatus->Delta = m_privateChain[m_privateChain.size() - 1].GetBlockHeight();
+        else if (m_privateChain.size() > 0 && m_publicChain.size() == 0){
+            m_selfishMinerStatus->Delta = m_privateChain.size();
         }
         else{
             m_selfishMinerStatus->Delta = 0;
