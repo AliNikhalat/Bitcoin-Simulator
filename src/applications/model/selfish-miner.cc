@@ -369,6 +369,12 @@ namespace blockchain_attacks{
                 ns3::Simulator::Cancel(m_nextMiningEvent);
                 ScheduleNextMiningEvent();
             }
+            else if(m_selfishMinerStatus->Delta == 1)
+            {
+                std::cout << "State 4" << std::endl;
+
+                //! nothing to do
+            }
         }
 
         return;
