@@ -191,6 +191,8 @@ namespace blockchain_attacks{
         updateDelta();
         updateTopBlock();
 
+        m_privateChain.push_back(newBlock);
+
         if(m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 2){
             std::cout << "State 1" << std::endl;
 
@@ -203,8 +205,10 @@ namespace blockchain_attacks{
                 ValidateBlock(newBlock);
             }
 
-            updateDelta();
+            resetAttack();
         }
+
+        updateDelta();
 
         ns3::BitcoinMiner::ScheduleNextMiningEvent();
 
@@ -331,7 +335,6 @@ namespace blockchain_attacks{
         //std::cout << "Receiving a New Block" << newBlock.GetBlockHeight() << std::endl;
 
         updateDelta();
-        updateTopBlock();
 
         std::ostringstream stringStream;
         std::string blockHash = stringStream.str();
@@ -365,8 +368,6 @@ namespace blockchain_attacks{
                 std::cout << "State 2" << std::endl;
 
                 m_selfishMinerStatus->HonestMinerWinBlock += 1;
-
-                //m_blockchain.AddBlock(newBlock);
 
                 ValidateBlock(newBlock);
 
@@ -464,6 +465,10 @@ namespace blockchain_attacks{
         else{
             m_selfishMinerStatus->Delta = 0;
         }
+
+        std::cout << "delta is : " << m_selfishMinerStatus->Delta
+        << "  selfish size is : " << m_privateChain.size()
+        << "  honest size is : " << m_publicChain.size() << std::endl;
 
         return;
     }
