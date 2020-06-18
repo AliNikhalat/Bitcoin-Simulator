@@ -197,6 +197,12 @@ namespace blockchain_attacks{
             m_selfishMinerStatus->SelfishMinerWinBlock += 2;
 
             ReleaseChain(m_privateChain);
+
+            for (const auto &block : m_privateChain)
+            {
+                ValidateBlock(newBlock);
+            }
+
             updateDelta();
         }
 
@@ -360,7 +366,7 @@ namespace blockchain_attacks{
 
                 m_selfishMinerStatus->HonestMinerWinBlock += 1;
 
-                m_blockchain.AddBlock(newBlock);
+                //m_blockchain.AddBlock(newBlock);
 
                 ValidateBlock(newBlock);
 
@@ -373,9 +379,26 @@ namespace blockchain_attacks{
             {
                 std::cout << "State 4" << std::endl;
 
-                //! nothing to do
+                //! nothing to do...another state define result of this state
+            }
+            else if(m_selfishMinerStatus->Delta == 2)
+            {
+                std::cout << "State 5" << std::endl;
+
+                m_selfishMinerStatus->SelfishMinerWinBlock += m_privateChain.size();
+
+                for(const auto& block: m_privateChain){
+                    ValidateBlock(newBlock);
+                }
+
+                resetAttack();
+
+                ns3::Simulator::Cancel(m_nextMiningEvent);
+                ScheduleNextMiningEvent();
             }
         }
+
+        updateDelta();
 
         return;
     }
