@@ -6,7 +6,7 @@
 #include "ns3/bitcoin-miner.h"
 #include "ns3/selfish-miner-status.h"
 
-namespace blockchain_attacks 
+namespace blockchain_attacks
 {
     class SelfishMiner : public ns3::BitcoinMiner
     {
@@ -15,10 +15,10 @@ namespace blockchain_attacks
 
         SelfishMiner();
 
-        void SetStatus(SelfishMinerStatus* selfishMinerStatus);
+        void SetStatus(SelfishMinerStatus *selfishMinerStatus);
 
     protected:
-        virtual void StartApplication(void); 
+        virtual void StartApplication(void);
 
         virtual void MineBlock(void);
 
@@ -35,13 +35,16 @@ namespace blockchain_attacks
         std::vector<ns3::Block> m_publicChain;
         ns3::Block m_topBlock;
 
-        SelfishMinerStatus* m_selfishMinerStatus;
+        SelfishMinerStatus *m_selfishMinerStatus;
 
         void updateTopBlock(void);
+
         void updateDelta(void);
+
+        void resetAttack(void);
 
         int GetSelfishChainLength(void);
     };
-};
+}; // namespace blockchain_attacks
 
 #endif

@@ -188,13 +188,14 @@ namespace blockchain_attacks{
         ns3::Block newBlock(height, minerId, parentBlockMinerId, m_nextBlockSize,
                        currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
 
-        m_privateChain.push_back(newBlock);
-
         updateDelta();
         updateTopBlock();
 
         if(m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 2){
+            std::cout << "State 1" << std::endl;
+
             m_selfishMinerStatus->SelfishMinerWinBlock += 2;
+
             ReleaseChain(m_privateChain);
             updateDelta();
         }
@@ -207,6 +208,10 @@ namespace blockchain_attacks{
     void SelfishMiner::ReleaseChain(std::vector<ns3::Block> blocks)
     {
         std::cout << "Releasing Chain" << std::endl;
+
+        for(const auto& block : blocks){
+            m_privateChain.push_back(block);
+        }
 
         rapidjson::Document inv;
         rapidjson::Document block;
@@ -319,6 +324,53 @@ namespace blockchain_attacks{
     {
         //std::cout << "Receiving a New Block" << newBlock.GetBlockHeight() << std::endl;
 
+        updateDelta();
+        updateTopBlock();
+
+        std::ostringstream stringStream;
+        std::string blockHash = stringStream.str();
+
+        stringStream << newBlock.GetBlockHeight() << "/" << newBlock.GetMinerId();
+        blockHash = stringStream.str();
+
+        if (m_blockchain.HasBlock(newBlock) || m_blockchain.IsOrphan(newBlock) || ReceivedButNotValidated(blockHash)){
+            NS_LOG_INFO("BitcoinSelfishMiner ReceiveBlock: Bitcoin node " << GetNode()->GetId() << " has already added this block in the m_blockchain: " << newBlock);
+
+            if (m_invTimeouts.find(blockHash) != m_invTimeouts.end())
+            {
+                m_queueInv.erase(blockHash);
+                ns3::Simulator::Cancel(m_invTimeouts[blockHash]);
+                m_invTimeouts.erase(blockHash);
+            }
+        }
+        else{
+            NS_LOG_INFO("BitcoinSelfishMiner ReceiveBlock: Bitcoin node " << GetNode()->GetId() << " has NOT added this block in the m_blockchain: " << newBlock);
+
+            m_receivedNotValidated[blockHash] = newBlock;
+
+            m_queueInv.erase(blockHash);
+            ns3::Simulator::Cancel(m_invTimeouts[blockHash]);
+            m_invTimeouts.erase(blockHash);
+
+            m_publicChain.push_back(newBlock);
+
+            if (m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 0)
+            {
+                std::cout << "State 2" << std::endl;
+
+                m_selfishMinerStatus->HonestMinerWinBlock += 1;
+
+                m_blockchain.AddBlock(newBlock);
+
+                ValidateBlock(newBlock);
+
+                resetAttack();
+
+                ns3::Simulator::Cancel(m_nextMiningEvent);
+                ScheduleNextMiningEvent();
+            }
+        }
+
         return;
     }
 
@@ -341,7 +393,7 @@ namespace blockchain_attacks{
 
     void SelfishMiner::updateTopBlock(void)
     {
-        //std::cout << "Updating Top Block" << std::endl;
+        NS_LOG_INFO("Updating Top Block");
 
         if(m_privateChain.size() != 0){
             m_topBlock = m_privateChain[m_privateChain.size() - 1];
@@ -357,6 +409,7 @@ namespace blockchain_attacks{
     void SelfishMiner::updateDelta(void)
     {
         NS_LOG_INFO("updating delta");
+
         if (m_privateChain.size() > 0 && m_publicChain.size() > 0){
 
             int delta = m_privateChain[m_privateChain.size() - 1].GetBlockHeight() -
@@ -378,6 +431,12 @@ namespace blockchain_attacks{
         }
 
         return;
+    }
+
+    void SelfishMiner::resetAttack(void)
+    {
+        m_privateChain.clear();
+        m_publicChain.clear();
     }
 
     int SelfishMiner::GetSelfishChainLength(void)
