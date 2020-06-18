@@ -9,6 +9,8 @@ namespace blockchain_attacks {
     class HonestMiner : public ns3::BitcoinMiner
     {
     public:
+        static ns3::TypeId GetTypeId(void);
+        
         HonestMiner();
 
         void SetStatus(SelfishMinerStatus *selfishMinerStatus);
@@ -16,7 +18,7 @@ namespace blockchain_attacks {
         void SetGamma(double gamma);
     
     protected:
-        virtual void MineBlock(void);
+        //virtual void MineBlock(void);
 
     private:
         double m_gamma;

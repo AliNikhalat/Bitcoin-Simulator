@@ -16,6 +16,7 @@
 uint blockIntervalMinutes;
 uint blockNumber = 1;
 uint iterations = 1;
+uint gammaParameter = 0.7;
 
 NS_LOG_COMPONENT_DEFINE("selfish-miner-main");
 
@@ -35,9 +36,7 @@ int main(int argc, char *argv[])
     const double realAverageBlockGenIntervalMinutes = 10; //minutes
     const uint16_t bitcoinPort = 8333;
 
-    double minersHash[] = {0.185, 0.159, 0.133, 0.066, 0.054,
-                           0.029, 0.016, 0.012, 0.012, 0.012, 0.009,
-                           0.005, 0.005, 0.002, 0.002, 0.3};
+    double minersHash[] = {0.7, 0.3};
 
     enum BitcoinRegion minersRegions[] = {ASIA_PACIFIC, ASIA_PACIFIC, NORTH_AMERICA, ASIA_PACIFIC, NORTH_AMERICA,
                                           EUROPE, EUROPE, NORTH_AMERICA, NORTH_AMERICA, NORTH_AMERICA, EUROPE,
@@ -106,10 +105,14 @@ int main(int argc, char *argv[])
                                                   nodesConnections[miner], noMiners, peersDownloadSpeeds[miner], peersUploadSpeeds[miner],
                                                   nodesInternetSpeeds[miner], nodeStatic, minersHash[miner], averageBlockGenIntervalSeconds);
 
-            if(attackerId == miner){
+            if(miner != attackerId){
+                std::cout << "miner id is : " << miner << std::endl;
+                bitcoinMinerHelper.SetMinerType(MY_HONEST_MINER);
+                bitcoinMinerHelper.SetGamma(gammaParameter);
+            }
+            else if (miner == attackerId){
                 std::cout << "attacker id is : " << attackerId << std::endl;
                 bitcoinMinerHelper.SetMinerType(MY_SELFISH_MINER);
-                bitcoinMinerHelper.SetSelfishStatus(&selfishStatus);
             }
 
             bitcoinMinerHelper.SetPeersAddresses(nodesConnections[miner]);
@@ -117,6 +120,7 @@ int main(int argc, char *argv[])
             bitcoinMinerHelper.SetPeersUploadSpeeds(peersUploadSpeeds[miner]);
             bitcoinMinerHelper.SetNodeInternetSpeeds(nodesInternetSpeeds[miner]);
             bitcoinMinerHelper.SetNodeStats(&nodeStatic[miner]);
+            bitcoinMinerHelper.SetSelfishStatus(&selfishStatus);
 
             bitcoinMiners.Add(bitcoinMinerHelper.Install(targetNode));
         }
