@@ -1,3 +1,5 @@
+#include <random>
+
 #include "ns3/honest-miner.h"
 
 #include "ns3/address.h"
@@ -308,5 +310,14 @@ namespace blockchain_attacks{
         m_minerGeneratedBlocks++;
 
         ScheduleNextMiningEvent();
+    }
+
+    double HonestMiner::generateRandomGamma(void)
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(0, 1);
+
+        return dis(gen);
     }
 }

@@ -24,6 +24,8 @@ namespace blockchain_attacks {
         double m_gamma;
 
         SelfishMinerStatus *m_selfishMinerStatus;
+
+        double generateRandomGamma(void);
     };
 
 }
