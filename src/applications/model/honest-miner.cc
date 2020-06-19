@@ -129,4 +129,184 @@ namespace blockchain_attacks{
 
         return;
     }
+
+    void HonestMiner::MineBlock(void)
+    {
+        std::cout << "honest number : " << m_hashRate << " mine a block" << std::endl;
+
+        m_selfishMinerStatus->MinedBlock++;
+
+        int height = m_blockchain.GetCurrentTopBlock()->GetBlockHeight() + 1;
+        int minerId = GetNode()->GetId();
+        int parentBlockMinerId = m_blockchain.GetCurrentTopBlock()->GetMinerId();
+        double currentTime = ns3::Simulator::Now().GetSeconds();
+
+        std::ostringstream stringStream;
+        std::string blockHash;
+        stringStream << height << "/" << minerId;
+        blockHash = stringStream.str();
+
+        if (m_fixedBlockSize > 0)
+            m_nextBlockSize = m_fixedBlockSize;
+        else
+        {
+            m_nextBlockSize = m_blockSizeDistribution(m_generator) * 1000;
+
+            if (m_cryptocurrency == ns3::BITCOIN)
+            {
+                if (m_nextBlockSize < m_maxBlockSize - m_headersSizeBytes)
+                    m_nextBlockSize = m_nextBlockSize * m_averageBlockGenIntervalSeconds / m_realAverageBlockGenIntervalSeconds + m_headersSizeBytes;
+                else
+                    m_nextBlockSize = m_nextBlockSize * m_averageBlockGenIntervalSeconds / m_realAverageBlockGenIntervalSeconds;
+            }
+        }
+
+        if (m_nextBlockSize < m_averageTransactionSize)
+            m_nextBlockSize = m_averageTransactionSize + m_headersSizeBytes;
+
+        ns3::Block newBlock(height, minerId, parentBlockMinerId, m_nextBlockSize,
+                            currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
+
+        rapidjson::Document inv;
+        rapidjson::Document block;
+
+        inv.SetObject();
+        block.SetObject();
+
+        rapidjson::Value value;
+        rapidjson::Value array(rapidjson::kArrayType);
+        rapidjson::Value blockInfo(rapidjson::kObjectType);
+
+        value.SetString("block");
+        inv.AddMember("type", value, inv.GetAllocator());
+
+        if (m_protocolType == ns3::STANDARD_PROTOCOL)
+        {
+            if (!m_blockTorrent)
+            {
+                value = ns3::INV;
+                inv.AddMember("message", value, inv.GetAllocator());
+
+                value.SetString(blockHash.c_str(), blockHash.size(), inv.GetAllocator());
+                array.PushBack(value, inv.GetAllocator());
+
+                inv.AddMember("inv", array, inv.GetAllocator());
+            }
+            else
+            {
+                value = ns3::EXT_INV;
+                inv.AddMember("message", value, inv.GetAllocator());
+
+                value.SetString(blockHash.c_str(), blockHash.size(), inv.GetAllocator());
+                blockInfo.AddMember("hash", value, inv.GetAllocator());
+
+                value = newBlock.GetBlockSizeBytes();
+                blockInfo.AddMember("size", value, inv.GetAllocator());
+
+                value = true;
+                blockInfo.AddMember("fullBlock", value, inv.GetAllocator());
+
+                array.PushBack(blockInfo, inv.GetAllocator());
+                inv.AddMember("inv", array, inv.GetAllocator());
+            }
+        }
+        else if (m_protocolType == ns3::SENDHEADERS)
+        {
+
+            value = newBlock.GetBlockHeight();
+            blockInfo.AddMember("height", value, inv.GetAllocator());
+
+            value = newBlock.GetMinerId();
+            blockInfo.AddMember("minerId", value, inv.GetAllocator());
+
+            value = newBlock.GetParentBlockMinerId();
+            blockInfo.AddMember("parentBlockMinerId", value, inv.GetAllocator());
+
+            value = newBlock.GetBlockSizeBytes();
+            blockInfo.AddMember("size", value, inv.GetAllocator());
+
+            value = newBlock.GetTimeCreated();
+            blockInfo.AddMember("timeCreated", value, inv.GetAllocator());
+
+            value = newBlock.GetTimeReceived();
+            blockInfo.AddMember("timeReceived", value, inv.GetAllocator());
+
+            if (!m_blockTorrent)
+            {
+                value = ns3::HEADERS;
+                inv.AddMember("message", value, inv.GetAllocator());
+            }
+            else
+            {
+                value = ns3::EXT_HEADERS;
+                inv.AddMember("message", value, inv.GetAllocator());
+
+                value = true;
+                blockInfo.AddMember("fullBlock", value, inv.GetAllocator());
+            }
+
+            array.PushBack(blockInfo, inv.GetAllocator());
+            inv.AddMember("blocks", array, inv.GetAllocator());
+        }
+
+        m_meanBlockReceiveTime = (m_blockchain.GetTotalBlocks() - 1) / static_cast<double>(m_blockchain.GetTotalBlocks()) * m_meanBlockReceiveTime + (currentTime - m_previousBlockReceiveTime) / (m_blockchain.GetTotalBlocks());
+        m_previousBlockReceiveTime = currentTime;
+
+        m_meanBlockPropagationTime = (m_blockchain.GetTotalBlocks() - 1) / static_cast<double>(m_blockchain.GetTotalBlocks()) * m_meanBlockPropagationTime;
+
+        m_meanBlockSize = (m_blockchain.GetTotalBlocks() - 1) / static_cast<double>(m_blockchain.GetTotalBlocks()) * m_meanBlockSize + (m_nextBlockSize) / static_cast<double>(m_blockchain.GetTotalBlocks());
+
+        m_blockchain.AddBlock(newBlock);
+
+        rapidjson::StringBuffer invInfo;
+        rapidjson::Writer<rapidjson::StringBuffer> invWriter(invInfo);
+        inv.Accept(invWriter);
+
+        rapidjson::StringBuffer blockInfoBuffer;
+        rapidjson::Writer<rapidjson::StringBuffer> blockWriter(blockInfoBuffer);
+        block.Accept(blockWriter);
+
+        int count = 0;
+
+        for (std::vector<ns3::Ipv4Address>::const_iterator i = m_peersAddresses.begin(); i != m_peersAddresses.end(); ++i, ++count)
+        {
+
+            const uint8_t delimiter[] = "#";
+
+            m_peersSockets[*i]->Send(reinterpret_cast<const uint8_t *>(invInfo.GetString()), invInfo.GetSize(), 0);
+            m_peersSockets[*i]->Send(delimiter, 1, 0);
+
+            if (m_protocolType == ns3::STANDARD_PROTOCOL && !m_blockTorrent)
+                m_nodeStats->invSentBytes += m_bitcoinMessageHeader + m_countBytes + inv["inv"].Size() * m_inventorySizeBytes;
+            else if (m_protocolType == ns3::SENDHEADERS && !m_blockTorrent)
+                m_nodeStats->headersSentBytes += m_bitcoinMessageHeader + m_countBytes + inv["blocks"].Size() * m_headersSizeBytes;
+            else if (m_protocolType == ns3::STANDARD_PROTOCOL && m_blockTorrent)
+            {
+                m_nodeStats->extInvSentBytes += m_bitcoinMessageHeader + m_countBytes + inv["inv"].Size() * m_inventorySizeBytes;
+                for (int j = 0; j < inv["inv"].Size(); j++)
+                {
+                    m_nodeStats->extInvSentBytes += 5; //1Byte(fullBlock) + 4Bytes(numberOfChunks)
+                    if (!inv["inv"][j]["fullBlock"].GetBool())
+                        m_nodeStats->extInvSentBytes += inv["inv"][j]["availableChunks"].Size() * 1;
+                }
+            }
+            else if (m_protocolType == ns3::SENDHEADERS && m_blockTorrent)
+            {
+                m_nodeStats->extHeadersSentBytes += m_bitcoinMessageHeader + m_countBytes + inv["blocks"].Size() * m_headersSizeBytes;
+                for (int j = 0; j < inv["blocks"].Size(); j++)
+                {
+                    m_nodeStats->extHeadersSentBytes += 1; //fullBlock
+                    if (!inv["blocks"][j]["fullBlock"].GetBool())
+                        m_nodeStats->extHeadersSentBytes += inv["inv"][j]["availableChunks"].Size();
+                }
+            }
+        }
+
+        m_minerAverageBlockGenInterval = m_minerGeneratedBlocks / static_cast<double>(m_minerGeneratedBlocks + 1) * m_minerAverageBlockGenInterval + (ns3::Simulator::Now().GetSeconds() - m_previousBlockGenerationTime) / (m_minerGeneratedBlocks + 1);
+        m_minerAverageBlockSize = m_minerGeneratedBlocks / static_cast<double>(m_minerGeneratedBlocks + 1) * m_minerAverageBlockSize + static_cast<double>(m_nextBlockSize) / (m_minerGeneratedBlocks + 1);
+        m_previousBlockGenerationTime = ns3::Simulator::Now().GetSeconds();
+        m_minerGeneratedBlocks++;
+
+        ScheduleNextMiningEvent();
+    }
 }

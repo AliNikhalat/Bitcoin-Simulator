@@ -18,7 +18,7 @@ namespace blockchain_attacks {
         void SetGamma(double gamma);
     
     protected:
-        //virtual void MineBlock(void);
+        virtual void MineBlock(void);
 
     private:
         double m_gamma;
