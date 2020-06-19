@@ -65,6 +65,8 @@ int main(int argc, char *argv[])
     selfishStatus.Delta = 0;
     selfishStatus.HonestMinerWinBlock = 0;
     selfishStatus.SelfishMinerWinBlock = 0;
+    selfishStatus.HonestChainLength = 0;
+    selfishStatus.SelfishChainLength = 0;
     selfishStatus.MinedBlock = 0;
 
     srand(1000);

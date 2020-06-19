@@ -471,9 +471,12 @@ namespace blockchain_attacks{
             m_selfishMinerStatus->Delta = 0;
         }
 
+        m_selfishMinerStatus->SelfishChainLength = m_privateChain.size();
+        m_selfishMinerStatus->HonestChainLength = m_publicChain.size();
+
         std::cout << "delta is : " << m_selfishMinerStatus->Delta
-        << "  selfish size is : " << m_privateChain.size()
-        << "  honest size is : " << m_publicChain.size() << std::endl;
+        << "  selfish size is : " << m_selfishMinerStatus->SelfishChainLength
+        << "  honest size is : " << m_selfishMinerStatus->HonestChainLength << std::endl;
 
         return;
     }
@@ -482,6 +485,9 @@ namespace blockchain_attacks{
     {
         m_privateChain.clear();
         m_publicChain.clear();
+
+        m_selfishMinerStatus->SelfishChainLength = 0;
+        m_selfishMinerStatus->HonestChainLength = 0;
     }
 
     int SelfishMiner::GetSelfishChainLength(void)
