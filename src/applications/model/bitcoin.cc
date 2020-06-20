@@ -637,6 +637,11 @@ Blockchain::GetLongestForkSize (void)
   return maxSize;
 }
 
+std::vector<ns3::Block> Blockchain::GetBlocksInSameHeight(int height)
+{
+  return m_blocks[height];
+}
+
 
 bool operator== (const Block &block1, const Block &block2)
 {

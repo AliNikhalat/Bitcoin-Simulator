@@ -325,6 +325,8 @@ public:
    */
   int GetLongestForkSize (void);
 
+  std::vector<ns3::Block> GetBlocksInSameHeight(int height);
+
   friend std::ostream& operator<< (std::ostream &out, Blockchain &blockchain);
 
 private:

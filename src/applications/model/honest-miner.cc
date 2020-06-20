@@ -139,7 +139,18 @@ namespace blockchain_attacks{
         m_selfishMinerStatus->MinedBlock++;
 
         std::cout << "****************chain mine***************" << std::endl;
-        std::cout << m_blockchain << std::endl;
+        std::cout << "size is : " << m_blockchain.GetBlockchainHeight() << std::endl;
+        if(m_blockchain.GetBlockchainHeight() > 0){
+            std::vector<ns3::Block> blocks = m_blockchain.GetBlocksInSameHeight(m_blockchain.GetBlockchainHeight());
+            for (const ns3::Block &block : blocks)
+            {
+                std::cout << block.ToString() << std::endl;
+            }
+
+            std::cout << "$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
+            std::cout << m_blockchain << std::endl;
+        }
+        //std::cout << m_blockchain << std::endl;
         std::cout << "*******************************" << std::endl;
 
         int height = m_blockchain.GetCurrentTopBlock()->GetBlockHeight() + 1;
