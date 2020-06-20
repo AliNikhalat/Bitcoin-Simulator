@@ -20,6 +20,8 @@ namespace blockchain_attacks {
     protected:
         virtual void MineBlock(void);
 
+        virtual void ReceiveBlock(const ns3::Block &newBlock);
+
     private:
         double m_gamma;
 

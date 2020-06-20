@@ -138,6 +138,10 @@ namespace blockchain_attacks{
 
         m_selfishMinerStatus->MinedBlock++;
 
+        std::cout << "****************chain mine***************" << std::endl;
+        std::cout << m_blockchain << std::endl;
+        std::cout << "*******************************" << std::endl;
+
         int height = m_blockchain.GetCurrentTopBlock()->GetBlockHeight() + 1;
         int minerId = GetNode()->GetId();
         int parentBlockMinerId = m_blockchain.GetCurrentTopBlock()->GetMinerId();
@@ -168,6 +172,8 @@ namespace blockchain_attacks{
 
         ns3::Block newBlock(height, minerId, parentBlockMinerId, m_nextBlockSize,
                             currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
+
+        std::cout << "block height is : " << height << std::endl;
 
         rapidjson::Document inv;
         rapidjson::Document block;
@@ -310,6 +316,41 @@ namespace blockchain_attacks{
         m_minerGeneratedBlocks++;
 
         ScheduleNextMiningEvent();
+    }
+
+    void HonestMiner::ReceiveBlock(const ns3::Block &newBlock)
+    {
+        std::ostringstream stringStream;
+        std::string blockHash = stringStream.str();
+
+        stringStream << newBlock.GetBlockHeight() << "/" << newBlock.GetMinerId();
+        blockHash = stringStream.str();
+
+        if (m_blockchain.HasBlock(newBlock) || m_blockchain.IsOrphan(newBlock) || ReceivedButNotValidated(blockHash)){
+            NS_LOG_INFO("BitcoinSelfishMiner ReceiveBlock: Bitcoin node " << GetNode()->GetId() << " has already added this block in the m_blockchain: " << newBlock);
+
+            if (m_invTimeouts.find(blockHash) != m_invTimeouts.end())
+            {
+                m_queueInv.erase(blockHash);
+                ns3::Simulator::Cancel(m_invTimeouts[blockHash]);
+                m_invTimeouts.erase(blockHash);
+            }
+        }
+        else{
+            NS_LOG_INFO("BitcoinSelfishMiner ReceiveBlock: Bitcoin node " << GetNode()->GetId() << " has NOT added this block in the m_blockchain: " << newBlock);
+
+            m_receivedNotValidated[blockHash] = newBlock;
+
+            m_queueInv.erase(blockHash);
+            ns3::Simulator::Cancel(m_invTimeouts[blockHash]);
+            m_invTimeouts.erase(blockHash);
+
+            m_blockchain.AddBlock(newBlock);
+
+            // std::cout << "***************chain****************" << std::endl;
+            // std::cout << m_blockchain << std::endl;
+            // std::cout << "************************************" << std::endl;
+        }
     }
 
     double HonestMiner::generateRandomGamma(void)

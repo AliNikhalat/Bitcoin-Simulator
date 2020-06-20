@@ -156,6 +156,8 @@ namespace blockchain_attacks{
 
         m_selfishMinerStatus->MinedBlock ++;
 
+        updateTopBlock();
+
         int height = m_topBlock.GetBlockHeight() + 1;
         int minerId = GetNode()->GetId();
         int parentBlockMinerId = m_topBlock.GetMinerId();
@@ -188,6 +190,9 @@ namespace blockchain_attacks{
         ns3::Block newBlock(height, minerId, parentBlockMinerId, m_nextBlockSize,
                        currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
 
+        std::cout << "top block : " << (*m_blockchain.GetCurrentTopBlock()).GetBlockHeight() << std::endl;
+        std::cout << "block height is : " << height << std::endl;
+
         updateDelta();
         updateTopBlock();
 
@@ -199,11 +204,6 @@ namespace blockchain_attacks{
             m_selfishMinerStatus->SelfishMinerWinBlock += 2;
 
             ReleaseChain(m_privateChain);
-
-            for (const auto &block : m_privateChain)
-            {
-                ValidateBlock(newBlock);
-            }
 
             resetAttack();
         }
@@ -219,9 +219,12 @@ namespace blockchain_attacks{
     {
         std::cout << "Releasing Chain" << std::endl;
 
+        std::cout << "**************Release********************" << std::endl;
         for(const auto& block : blocks){
-            m_privateChain.push_back(block);
+            m_blockchain.AddBlock(block);
+            std::cout << block.ToString() << std::endl;
         }
+        std::cout << "**********************************" << std::endl;
 
         rapidjson::Document inv;
         rapidjson::Document block;
@@ -369,7 +372,7 @@ namespace blockchain_attacks{
 
                 m_selfishMinerStatus->HonestMinerWinBlock += 1;
 
-                ValidateBlock(newBlock);
+                m_blockchain.AddBlock(newBlock);
 
                 resetAttack();
 
@@ -380,13 +383,21 @@ namespace blockchain_attacks{
             {
                 std::cout << "State 3" << std::endl;
 
-                
+                resetAttack();
+
+                ScheduleNextMiningEvent();
             }
             else if(m_selfishMinerStatus->Delta == 1)
             {
                 std::cout << "State 4" << std::endl;
 
-                //! nothing to do...another state define result of this state
+                ns3::Simulator::Cancel(m_nextMiningEvent);
+
+                ReleaseChain(m_privateChain);
+
+                //resetAttack();
+
+                ScheduleNextMiningEvent();
             }
             else if(m_selfishMinerStatus->Delta == 2)
             {
@@ -394,13 +405,12 @@ namespace blockchain_attacks{
 
                 m_selfishMinerStatus->SelfishMinerWinBlock += m_privateChain.size();
 
-                for(const auto& block: m_privateChain){
-                    ValidateBlock(newBlock);
-                }
+                ns3::Simulator::Cancel(m_nextMiningEvent);
+
+                ReleaseChain(m_privateChain);
 
                 resetAttack();
 
-                ns3::Simulator::Cancel(m_nextMiningEvent);
                 ScheduleNextMiningEvent();
             }
             else if(m_selfishMinerStatus->Delta > 2)
@@ -437,13 +447,35 @@ namespace blockchain_attacks{
     {
         NS_LOG_INFO("Updating Top Block");
 
-        if(m_privateChain.size() != 0){
-            m_topBlock = m_privateChain[m_privateChain.size() - 1];
+        double currentTime = ns3::Simulator::Now().GetSeconds();
 
-            return;
+        ns3::Block privateChainTop(-100, -100, -100, m_nextBlockSize,
+                                   currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
+        ns3::Block publicChainTop(-100, -100, -100, m_nextBlockSize,
+                                  currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
+        ns3::Block mainChainTop = *(m_blockchain.GetCurrentTopBlock());
+
+        if(m_privateChain.size() > 0){
+            privateChainTop = m_privateChain[m_privateChain.size() - 1];
         }
 
-        m_topBlock = *(m_blockchain.GetCurrentTopBlock());
+        if(m_publicChain.size() > 0){
+            publicChainTop = m_publicChain[m_publicChain.size() - 1];
+        }
+
+        if(privateChainTop.GetBlockHeight() >= publicChainTop.GetBlockHeight() &&
+            privateChainTop.GetBlockHeight() >= mainChainTop.GetBlockHeight()){
+
+            m_topBlock = privateChainTop;
+        }
+        else if(publicChainTop.GetBlockHeight() >= mainChainTop.GetBlockHeight()){
+
+            m_topBlock = publicChainTop;
+        }
+        else{
+
+            m_topBlock = *(m_blockchain.GetCurrentTopBlock());
+        }
 
         return;
     }
@@ -454,8 +486,7 @@ namespace blockchain_attacks{
 
         if (m_privateChain.size() > 0 && m_publicChain.size() > 0){
 
-            int delta = m_privateChain[m_privateChain.size() - 1].GetBlockHeight() -
-                        m_publicChain[m_publicChain.size() - 1].GetBlockHeight();
+            int delta = m_privateChain.size() - m_publicChain.size();
 
             if(delta >= 0){
                 m_selfishMinerStatus->Delta = delta;
