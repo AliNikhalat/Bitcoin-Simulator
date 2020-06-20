@@ -28,6 +28,8 @@ namespace blockchain_attacks {
         SelfishMinerStatus *m_selfishMinerStatus;
 
         double generateRandomGamma(void);
+
+        bool DoesTossUpHappen(void);
     };
 
 }

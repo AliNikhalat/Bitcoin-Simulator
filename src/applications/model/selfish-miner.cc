@@ -368,6 +368,8 @@ namespace blockchain_attacks{
 
             if (m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 0)
             {
+                ns3::Simulator::Cancel(m_nextMiningEvent);
+
                 std::cout << "State 2" << std::endl;
 
                 m_selfishMinerStatus->HonestMinerWinBlock += 1;
@@ -376,7 +378,6 @@ namespace blockchain_attacks{
 
                 resetAttack();
 
-                ns3::Simulator::Cancel(m_nextMiningEvent);
                 ScheduleNextMiningEvent();
             }
             else if (m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 1)
@@ -394,8 +395,6 @@ namespace blockchain_attacks{
                 ns3::Simulator::Cancel(m_nextMiningEvent);
 
                 ReleaseChain(m_privateChain);
-
-                //resetAttack();
 
                 ScheduleNextMiningEvent();
             }
