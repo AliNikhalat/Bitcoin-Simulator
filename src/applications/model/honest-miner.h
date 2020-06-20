@@ -30,6 +30,8 @@ namespace blockchain_attacks {
         double generateRandomGamma(void);
 
         bool DoesTossUpHappen(void);
+
+        int simulateTossUpCondition();
     };
 
 }

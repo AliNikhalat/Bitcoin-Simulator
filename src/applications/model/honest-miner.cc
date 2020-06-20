@@ -157,8 +157,16 @@ namespace blockchain_attacks{
 
         int height = m_blockchain.GetCurrentTopBlock()->GetBlockHeight() + 1;
         int minerId = GetNode()->GetId();
-        int parentBlockMinerId = m_blockchain.GetCurrentTopBlock()->GetMinerId();
+        int parentBlockMinerId;
         double currentTime = ns3::Simulator::Now().GetSeconds();
+
+        if(!DoesTossUpHappen()){
+            parentBlockMinerId = m_blockchain.GetCurrentTopBlock()->GetMinerId();
+        }
+        else{
+            std::cout << "starting toss up condition" << std::endl;
+            parentBlockMinerId = simulateTossUpCondition();
+        }
 
         std::ostringstream stringStream;
         std::string blockHash;
@@ -379,5 +387,43 @@ namespace blockchain_attacks{
     {
         return m_selfishMinerStatus->HonestChainLength == m_selfishMinerStatus->SelfishChainLength &&
                  m_selfishMinerStatus->SelfishChainLength > 0;
+    }
+
+    int HonestMiner::simulateTossUpCondition(void)
+    {
+        int parentMinerId = -1;
+        auto blocks = m_blockchain.GetBlocksInSameHeight(m_blockchain.GetBlockchainHeight());
+
+        double randomGamma = generateRandomGamma();
+
+        if(m_gamma <= randomGamma){
+
+            m_selfishMinerStatus->HonestMinerWinBlock += 1;
+            m_selfishMinerStatus->SelfishMinerWinBlock += 1;
+
+            bool found = false;
+            for(const auto& block : blocks){
+                if(block.GetMinerId() == 1){
+                    found = true;
+                    parentMinerId = block.GetMinerId();
+                }
+            }
+
+            if(found){
+                std::cout << "Received fork from selfish" << std::endl;
+            }
+            else{
+                std::cout << "Not Received fork from selfish" << std::endl;
+                parentMinerId = 1;
+            }
+        }
+        else
+        {
+            m_selfishMinerStatus->HonestMinerWinBlock += 2;
+
+            parentMinerId = m_blockchain.GetCurrentTopBlock()->GetMinerId();
+        }   
+        
+        return parentMinerId;
     }
 }
