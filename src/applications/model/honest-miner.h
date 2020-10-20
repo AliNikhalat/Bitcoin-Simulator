@@ -32,6 +32,8 @@ namespace blockchain_attacks {
         bool DoesTossUpHappen(void);
 
         int simulateTossUpCondition();
+
+        void resetAttack();
     };
 
 }

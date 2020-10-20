@@ -135,10 +135,11 @@ namespace blockchain_attacks{
     void HonestMiner::MineBlock(void)
     {
         std::cout << "honest number : " << m_hashRate << " mine a block" << std::endl;
+        m_selfishMinerStatus->HonestTry ++;
 
-        m_selfishMinerStatus->MinedBlock++;
+        //m_selfishMinerStatus->MinedBlock++;
 
-        // std::cout << "****************chain mine***************" << std::endl;
+        //std::cout << "****************chain mine***************" << std::endl;
         // std::cout << "size is : " << m_blockchain.GetBlockchainHeight() << std::endl;
         // if(m_blockchain.GetBlockchainHeight() > 0){
         //     std::vector<ns3::Block> blocks = m_blockchain.GetBlocksInSameHeight(m_blockchain.GetBlockchainHeight());
@@ -150,10 +151,9 @@ namespace blockchain_attacks{
         //     std::cout << "$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
         //     std::cout << m_blockchain << std::endl;
         // }
-        // //std::cout << m_blockchain << std::endl;
-        // std::cout << "*******************************" << std::endl;
+        //std::cout << m_blockchain << std::endl;
+        //std::cout << "*******************************" << std::endl;
 
-        std::cout << "Does Toss up : " << DoesTossUpHappen() << std::endl;
 
         int height = m_blockchain.GetCurrentTopBlock()->GetBlockHeight() + 1;
         int minerId = GetNode()->GetId();
@@ -164,7 +164,7 @@ namespace blockchain_attacks{
             parentBlockMinerId = m_blockchain.GetCurrentTopBlock()->GetMinerId();
         }
         else{
-            std::cout << "starting toss up condition" << std::endl;
+            //std::cout << "starting toss up condition" << std::endl;
             parentBlockMinerId = simulateTossUpCondition();
         }
 
@@ -336,6 +336,8 @@ namespace blockchain_attacks{
         m_previousBlockGenerationTime = ns3::Simulator::Now().GetSeconds();
         m_minerGeneratedBlocks++;
 
+        resetAttack();
+
         ScheduleNextMiningEvent();
     }
 
@@ -402,10 +404,14 @@ namespace blockchain_attacks{
             m_selfishMinerStatus->SelfishMinerWinBlock += 1;
 
             bool found = false;
-            for(const auto& block : blocks){
-                if(block.GetMinerId() == 1){
-                    found = true;
-                    parentMinerId = block.GetMinerId();
+            while(!found){
+                for (const auto &block : blocks)
+                {
+                    if (block.GetMinerId() == 1)
+                    {
+                        found = true;
+                        parentMinerId = block.GetMinerId();
+                    }
                 }
             }
 
@@ -414,6 +420,7 @@ namespace blockchain_attacks{
             }
             else{
                 std::cout << "Not Received fork from selfish" << std::endl;
+                throw;
                 parentMinerId = 1;
             }
         }
@@ -425,5 +432,14 @@ namespace blockchain_attacks{
         }   
         
         return parentMinerId;
+    }
+
+    void HonestMiner::resetAttack(void)
+    {
+        m_selfishMinerStatus->HonestChainLength = 0;
+        m_selfishMinerStatus->SelfishChainLength = 0;
+        m_selfishMinerStatus->Delta = 0;
+
+        return;
     }
 }

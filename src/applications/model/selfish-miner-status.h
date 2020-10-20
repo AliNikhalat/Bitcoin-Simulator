@@ -14,6 +14,11 @@ namespace blockchain_attacks{
         int HonestChainLength;
 
         int Delta;
+
+        int BlockHeight;
+
+        int SelfishTry;
+        int HonestTry;
     } SelfishMinerStatus;
     
 }

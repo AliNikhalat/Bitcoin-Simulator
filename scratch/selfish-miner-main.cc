@@ -16,7 +16,7 @@
 uint blockIntervalMinutes;
 uint blockNumber = 1;
 uint iterations = 1;
-uint gammaParameter = 0.7;
+uint gammaParameter = 0.99;
 
 NS_LOG_COMPONENT_DEFINE("selfish-miner-main");
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     const double realAverageBlockGenIntervalMinutes = 10; //minutes
     const uint16_t bitcoinPort = 8333;
 
-    double minersHash[] = {0.7, 0.3};
+    double minersHash[] = {0.6, 0.4};
 
     enum BitcoinRegion minersRegions[] = {ASIA_PACIFIC, ASIA_PACIFIC, NORTH_AMERICA, ASIA_PACIFIC, NORTH_AMERICA,
                                           EUROPE, EUROPE, NORTH_AMERICA, NORTH_AMERICA, NORTH_AMERICA, EUROPE,
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     int minConnectionsPerNode = 1;
     int maxConnectionsPerNode = 1;
 
-    double averageBlockGenIntervalSeconds = 10 * secsPerMin; //seconds
+    double averageBlockGenIntervalSeconds = 10 * 3600 * secsPerMin; //seconds
     double averageBlockGenIntervalMinutes = averageBlockGenIntervalSeconds / secsPerMin;
 
     int start = 0;
@@ -68,6 +68,9 @@ int main(int argc, char *argv[])
     selfishStatus.HonestChainLength = 0;
     selfishStatus.SelfishChainLength = 0;
     selfishStatus.MinedBlock = 0;
+    selfishStatus.BlockHeight = 0;
+    selfishStatus.HonestTry = 0;
+    selfishStatus.SelfishTry = 0;
 
     srand(1000);
     Time::SetResolution(Time::NS);
@@ -98,6 +101,10 @@ int main(int argc, char *argv[])
         nodesInternetSpeeds = bitcoinTopologyHelper.GetNodesInternetSpeeds();
 
         ApplicationContainer bitcoinMiners;
+
+        // BitcoinMinerHelper bitcoinMinerHelper("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), bitcoinPort),
+        //                                       nodesConnections[miners[0]], noMiners, peersDownloadSpeeds[0], peersUploadSpeeds[0], nodesInternetSpeeds[0],
+        //                                       nodeStatic, minersHash[0], averageBlockGenIntervalSeconds);
 
         for(size_t i{0}; i < noMiners; i++){
             auto miner = miners[i];
@@ -177,9 +184,26 @@ double get_wall_time()
 void printSelfishAttackStatus(blockchain_attacks::SelfishMinerStatus* selfishMinerStatus)
 {
     std::cout << "*****************Selfish Attack Status*********************" << std::endl;
-    std::cout << "Mined Block Number : " << selfishMinerStatus->MinedBlock << std::endl;
+    std::cout << "Iteration : " << selfishMinerStatus->MinedBlock << std::endl;
     std::cout << "Honest Miner Win Block : " << selfishMinerStatus->HonestMinerWinBlock << std::endl;
     std::cout << "Selfish Miner Win Block : " << selfishMinerStatus->SelfishMinerWinBlock << std::endl;
+    std::cout << "Honest Try : " << selfishMinerStatus->HonestTry << std::endl;
+    std::cout << "Selfish Try : " << selfishMinerStatus->SelfishTry << std::endl;
+
+    int minedBlock = selfishMinerStatus->HonestMinerWinBlock + selfishMinerStatus->SelfishMinerWinBlock;
+
+    std::cout << "Mined Block : " << selfishMinerStatus->MinedBlock << std::endl;
+    std::cout << "Stale Block : " << selfishMinerStatus->MinedBlock - minedBlock << std::endl;
+
+    std::cout << "Honest Expected Revenue is : " << (int)(0.6 * selfishMinerStatus->MinedBlock) << std::endl;
+    std::cout << "Honest Revenue is : " << 
+        ((double)selfishMinerStatus->HonestMinerWinBlock / minedBlock) * 100
+         << std::endl;
+
+    std::cout << "Selfish Expected Revenue is : " << (int)(0.4 * selfishMinerStatus->MinedBlock) << std::endl;
+    std::cout << "Selfish Revenue is : " << 
+        ((double)selfishMinerStatus->SelfishMinerWinBlock / minedBlock) * 100
+        << std::endl;
 
     return;
 }

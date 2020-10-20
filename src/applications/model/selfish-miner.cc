@@ -155,6 +155,7 @@ namespace blockchain_attacks{
         std::cout << "selfish number : " << m_hashRate << " mine a block" << std::endl;
 
         m_selfishMinerStatus->MinedBlock ++;
+        m_selfishMinerStatus->SelfishTry++;
 
         updateTopBlock();
 
@@ -190,8 +191,8 @@ namespace blockchain_attacks{
         ns3::Block newBlock(height, minerId, parentBlockMinerId, m_nextBlockSize,
                        currentTime, currentTime, ns3::Ipv4Address("127.0.0.1"));
 
-        std::cout << "top block : " << (*m_blockchain.GetCurrentTopBlock()).GetBlockHeight() << std::endl;
-        std::cout << "block height is : " << height << std::endl;
+        //std::cout << "top block : " << (*m_blockchain.GetCurrentTopBlock()).GetBlockHeight() << std::endl;
+        //std::cout << "block height is : " << height << std::endl;
 
         updateDelta();
         updateTopBlock();
@@ -347,6 +348,7 @@ namespace blockchain_attacks{
 
         if (m_blockchain.HasBlock(newBlock) || m_blockchain.IsOrphan(newBlock) || ReceivedButNotValidated(blockHash)){
             NS_LOG_INFO("BitcoinSelfishMiner ReceiveBlock: Bitcoin node " << GetNode()->GetId() << " has already added this block in the m_blockchain: " << newBlock);
+            std::cout << "not validated " << std::endl;
 
             if (m_invTimeouts.find(blockHash) != m_invTimeouts.end())
             {
@@ -364,11 +366,17 @@ namespace blockchain_attacks{
             ns3::Simulator::Cancel(m_invTimeouts[blockHash]);
             m_invTimeouts.erase(blockHash);
 
+            if(newBlock.GetBlockHeight() < (*m_blockchain.GetCurrentTopBlock()).GetBlockHeight()){
+                return;
+            }
+            
+            m_selfishMinerStatus->MinedBlock++;
+
             m_publicChain.push_back(newBlock);
 
             if (m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 0)
             {
-                ns3::Simulator::Cancel(m_nextMiningEvent);
+                //ns3::Simulator::Cancel(m_nextMiningEvent);
 
                 std::cout << "State 2" << std::endl;
 
@@ -378,25 +386,27 @@ namespace blockchain_attacks{
 
                 resetAttack();
 
-                ScheduleNextMiningEvent();
+                //ScheduleNextMiningEvent();
             }
             else if (m_selfishMinerStatus->Delta == 0 && GetSelfishChainLength() == 1)
             {
                 std::cout << "State 3" << std::endl;
 
+                m_blockchain.AddBlock(newBlock);
+
                 resetAttack();
 
-                ScheduleNextMiningEvent();
+                //ScheduleNextMiningEvent();
             }
             else if(m_selfishMinerStatus->Delta == 1)
             {
                 std::cout << "State 4" << std::endl;
 
-                ns3::Simulator::Cancel(m_nextMiningEvent);
+                //ns3::Simulator::Cancel(m_nextMiningEvent);
 
                 ReleaseChain(m_privateChain);
 
-                ScheduleNextMiningEvent();
+                //ScheduleNextMiningEvent();
             }
             else if(m_selfishMinerStatus->Delta == 2)
             {
@@ -404,13 +414,13 @@ namespace blockchain_attacks{
 
                 m_selfishMinerStatus->SelfishMinerWinBlock += m_privateChain.size();
 
-                ns3::Simulator::Cancel(m_nextMiningEvent);
+                //ns3::Simulator::Cancel(m_nextMiningEvent);
 
                 ReleaseChain(m_privateChain);
 
                 resetAttack();
 
-                ScheduleNextMiningEvent();
+                //ScheduleNextMiningEvent();
             }
             else if(m_selfishMinerStatus->Delta > 2)
             {

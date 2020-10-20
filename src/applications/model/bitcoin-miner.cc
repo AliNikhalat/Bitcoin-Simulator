@@ -70,7 +70,7 @@ BitcoinMiner::GetTypeId (void)
                    MakeUintegerChecker<uint32_t> ())				   
     .AddAttribute ("FixedBlockIntervalGeneration", 
                    "The fixed time to wait between two consecutive block generations",
-                   DoubleValue (0),
+                   DoubleValue (10 * 60 * 60),
                    MakeDoubleAccessor (&BitcoinMiner::m_fixedBlockTimeGeneration),
                    MakeDoubleChecker<double> ())
     .AddAttribute ("InvTimeoutMinutes", 
@@ -390,15 +390,18 @@ BitcoinMiner::ScheduleNextMiningEvent (void)
   {
     m_nextBlockTime = m_fixedBlockTimeGeneration;
 
+    std::cout << "^^^^^^^^^^##################" << std::endl;
+
     NS_LOG_DEBUG ("Time " << Simulator::Now ().GetSeconds () << ": Miner " << GetNode ()->GetId ()
                 << " fixed Block Time Generation " << m_fixedBlockTimeGeneration << "s");
-    m_nextMiningEvent = Simulator::Schedule (Seconds(m_fixedBlockTimeGeneration), &BitcoinMiner::MineBlock, this);
+    m_nextMiningEvent = Simulator::Schedule ( Minutes(m_fixedBlockTimeGeneration), &BitcoinMiner::MineBlock, this);
   }
   else
   {
     m_nextBlockTime = m_blockGenTimeDistribution(m_generator)*m_blockGenBinSize*m_secondsPerMin
                     *( m_averageBlockGenIntervalSeconds/m_realAverageBlockGenIntervalSeconds )/m_hashRate;
 
+    //std::cout << "Here" << std::endl;
     //NS_LOG_DEBUG("m_nextBlockTime = " << m_nextBlockTime << ", binsize = " << m_blockGenBinSize << ", m_blockGenParameter = " << m_blockGenParameter << ", hashrate = " << m_hashRate);
     m_nextMiningEvent = Simulator::Schedule (Seconds(m_nextBlockTime), &BitcoinMiner::MineBlock, this);
 	
