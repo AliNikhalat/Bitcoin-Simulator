@@ -161,6 +161,20 @@ Block::operator= (const Block &blockSource)
   return *this;
 }
 
+std::string Block::ToString(void) const
+{
+  std::string result = "";
+
+  result += "Block Height : " + std::to_string(m_blockHeight) + "\n";
+  result += "Miner Id :  " + std::to_string(m_minerId) + "\n";
+  result += "Parent Block Miner Id :  " + std::to_string(m_parentBlockMinerId) + "\n";
+  result += "Block Size Bytes : " + std::to_string(m_blockSizeBytes) + "\n";
+  result += "Time Created : " + std::to_string(m_timeCreated) + "\n";
+  result += "Time Received :  " + std::to_string(m_timeReceived) + "\n";
+
+  return result;
+}
+
 /**
  *
  * Class BitcoinChunk functions
@@ -621,6 +635,11 @@ Blockchain::GetLongestForkSize (void)
   }
    
   return maxSize;
+}
+
+std::vector<ns3::Block> Blockchain::GetBlocksInSameHeight(int height)
+{
+  return m_blocks[height];
 }
 
 

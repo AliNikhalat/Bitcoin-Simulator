@@ -94,6 +94,49 @@ BitcoinMinerHelper::InstallPriv (Ptr<Node> node) //FIX ME
         node->AddApplication (app);
         return app;
       }
+      case MY_SELFISH_MINER:
+      {
+        std::cout << "Installing My Selfish Miner" << std::endl;
+
+        Ptr<blockchain_attacks::SelfishMiner> app = m_factory.Create<blockchain_attacks::SelfishMiner>();
+
+        app->SetPeersAddresses(m_peersAddresses);
+        app->SetPeersDownloadSpeeds(m_peersDownloadSpeeds);
+        app->SetPeersUploadSpeeds(m_peersUploadSpeeds);
+        app->SetNodeInternetSpeeds(m_internetSpeeds);
+        app->SetNodeStats(m_nodeStats);
+        app->SetBlockBroadcastType(m_blockBroadcastType);
+        app->SetProtocolType(m_protocolType);
+        app->SetStatus(m_selfishMinerStatus);
+
+        node->AddApplication(app);
+
+        std::cout << "Installing My Selfish Miner finished!" << std::endl;
+
+        return app;
+      }
+      case MY_HONEST_MINER:
+      {
+        std::cout << "Installing My Honest Miner" << std::endl;
+
+        Ptr<blockchain_attacks::HonestMiner> app = m_factory.Create<blockchain_attacks::HonestMiner>();
+
+        app->SetPeersAddresses(m_peersAddresses);
+        app->SetPeersDownloadSpeeds(m_peersDownloadSpeeds);
+        app->SetPeersUploadSpeeds(m_peersUploadSpeeds);
+        app->SetNodeInternetSpeeds(m_internetSpeeds);
+        app->SetNodeStats(m_nodeStats);
+        app->SetBlockBroadcastType(m_blockBroadcastType);
+        app->SetProtocolType(m_protocolType);
+        app->SetStatus(m_selfishMinerStatus);
+        app->SetGamma(m_gamma);
+
+        node->AddApplication(app);
+
+        std::cout << "Installing My Honest Miner finished!" << std::endl;
+
+        return app;
+      }
    }
    
 }
@@ -111,7 +154,7 @@ BitcoinMinerHelper::SetMinerType (enum MinerType m)  //FIX ME
   
    switch (m) 
    {
-      case NORMAL_MINER: 
+      case NORMAL_MINER:
       {
         m_factory.SetTypeId ("ns3::BitcoinMiner");
         SetFactoryAttributes();
@@ -140,6 +183,20 @@ BitcoinMinerHelper::SetMinerType (enum MinerType m)  //FIX ME
 
         break;
       }
+      case MY_SELFISH_MINER:
+      {
+        m_factory.SetTypeId("blockchain_attacks::SelfishMiner");
+        SetFactoryAttributes();
+
+        break;
+      }
+      case MY_HONEST_MINER:
+      {
+        m_factory.SetTypeId("blockchain_attacks::HonestMiner");
+        SetFactoryAttributes();
+
+        break;
+      }
    }
 }
 
@@ -165,6 +222,20 @@ BitcoinMinerHelper::SetFactoryAttributes (void)
     m_factory.Set ("BlockGenBinSize", DoubleValue(m_blockGenBinSize));
     m_factory.Set ("BlockGenParameter", DoubleValue(m_blockGenParameter));
   }
+}
+
+void BitcoinMinerHelper::SetSelfishStatus(blockchain_attacks::SelfishMinerStatus* selfishMinerStatus)
+{
+  m_selfishMinerStatus = selfishMinerStatus;
+
+  return;
+}
+
+void BitcoinMinerHelper::SetGamma(double gamma)
+{
+  m_gamma = gamma;
+
+  return;
 }
 
 } // namespace ns3

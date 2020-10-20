@@ -43,7 +43,9 @@ enum MinerType
   NORMAL_MINER,                //DEFAULT
   SIMPLE_ATTACKER,
   SELFISH_MINER,
-  SELFISH_MINER_TRIALS
+  SELFISH_MINER_TRIALS,
+  MY_SELFISH_MINER,
+  MY_HONEST_MINER
 };
 
 
@@ -199,6 +201,8 @@ public:
   
   friend bool operator== (const Block &block1, const Block &block2);
   friend std::ostream& operator<< (std::ostream &out, const Block &block);
+
+  std::string ToString() const;
   
 protected:	
   int           m_blockHeight;                // The height of the block
@@ -320,6 +324,8 @@ public:
    * Gets the longest fork size
    */
   int GetLongestForkSize (void);
+
+  std::vector<ns3::Block> GetBlocksInSameHeight(int height);
 
   friend std::ostream& operator<< (std::ostream &out, Blockchain &blockchain);
 

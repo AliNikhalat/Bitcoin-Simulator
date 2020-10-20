@@ -1,0 +1,7 @@
+in ns3 folder open terminal and run below command:
+
+./waf --run "selfish-miner-main --blockNumber=100 --iterations=100"
+
+Debug Command:
+./waf --command-template="gdb %s" --run selfish-miner-main
+run --blockNumber=1

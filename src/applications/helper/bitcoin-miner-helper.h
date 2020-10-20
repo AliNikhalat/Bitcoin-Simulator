@@ -9,6 +9,9 @@
 #include "ns3/bitcoin-simple-attacker.h"
 #include "ns3/bitcoin-selfish-miner.h"
 #include "ns3/bitcoin-selfish-miner-trials.h"
+#include "ns3/selfish-miner.h"
+#include "ns3/honest-miner.h"
+#include "ns3/selfish-miner-status.h"
 
 
 namespace ns3 {
@@ -42,8 +45,14 @@ class BitcoinMinerHelper : public BitcoinNodeHelper
                       nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, double hashRate, double averageBlockGenIntervalSeconds);
 					  
   enum MinerType GetMinerType(void);
+
   void SetMinerType (enum MinerType m);
+
   void SetBlockBroadcastType (enum BlockBroadcastType m);
+
+  void SetSelfishStatus(blockchain_attacks::SelfishMinerStatus* selfishMinerStatus);
+
+  void SetGamma(double gamma);
 
 protected:
   /**
@@ -69,6 +78,10 @@ protected:
   double                    m_blockGenParameter;
   double                    m_averageBlockGenIntervalSeconds;
   uint32_t                  m_secureBlocks;
+  double                    m_gamma;
+
+private:
+  blockchain_attacks::SelfishMinerStatus* m_selfishMinerStatus;
 };
 
 } // namespace ns3
